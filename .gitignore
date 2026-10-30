@@ -1,0 +1,16 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+
+# Downloaded datasets and their conversions (~0.7 GB; see data/validation/SOURCES.md to re-create)
+data/raw/
+
+# Organiser's brief — third-party document, kept local only
+Case Study 2_IDV_Battery_Energy_System.pdf
+
+# Generated reports
+*_report.html
+packforge_report.html
