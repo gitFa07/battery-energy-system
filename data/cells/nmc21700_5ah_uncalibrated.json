@@ -1,0 +1,36 @@
+{
+  "id": "nmc21700_5ah",
+  "name": "Generic NMC 21700 5.0 Ah (high-energy class)",
+  "chemistry": "NMC",
+  "capacity_ah": 5.0,
+  "v_nom": 3.6,
+  "v_max": 4.2,
+  "v_min": 2.5,
+  "max_charge_a": 4.9,
+  "max_discharge_a": 9.8,
+  "r0_ohm": 0.020,
+  "r1_ohm": 0.012,
+  "tau_s": 30,
+  "r_temp_k": 3000,
+  "mass_kg": 0.069,
+  "diameter_mm": 21.1,
+  "height_mm": 70.8,
+  "cp_j_kgk": 1000,
+  "t_charge_min_c": 0,
+  "t_charge_max_c": 45,
+  "t_discharge_max_c": 60,
+  "cycle_life_ref": 800,
+  "aging_ea_over_r_k": 3600,
+  "cost_inr": 320,
+  "ocv_soc": [0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+  "ocv_v": [3.00, 3.35, 3.45, 3.55, 3.62, 3.68, 3.74, 3.82, 3.91, 4.00, 4.08, 4.18],
+  "sources": [
+    "Electrical/thermal limits typical of 5 Ah high-energy 21700 datasheets (e.g. INR21700-50E class) — verify against the exact datasheet used"
+  ],
+  "assumptions": [
+    {"id": "C-NMC-1", "text": "OCV curve is a generic NMC shape, not fitted to measured data", "affects": ["cell", "electrical"]},
+    {"id": "C-NMC-2", "text": "R0=20 mΩ, R1=12 mΩ, τ=30 s at 25 °C; Arrhenius Ea/R=3000 K", "affects": ["cell", "electrical", "thermal"]},
+    {"id": "C-NMC-3", "text": "Cycle life 800 cycles to 80% SOH at 25 °C is a placeholder", "affects": ["cell"]},
+    {"id": "C-NMC-4", "text": "Cell price ₹320 is a placeholder; replace with a supplier quote", "affects": ["cost"]}
+  ]
+}

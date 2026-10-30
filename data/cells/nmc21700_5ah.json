@@ -1,0 +1,86 @@
+{
+  "id": "nmc21700_5ah",
+  "name": "Generic NMC 21700 5 Ah class (calibrated on LG M50LT proxy)",
+  "chemistry": "NMC",
+  "capacity_ah": 4.874,
+  "v_nom": 3.6,
+  "v_max": 4.2,
+  "v_min": 2.5,
+  "max_charge_a": 4.9,
+  "max_discharge_a": 9.8,
+  "r0_ohm": 0.02668,
+  "r1_ohm": 0.02297,
+  "tau_s": 45.7,
+  "r_temp_k": 1672.0,
+  "mass_kg": 0.069,
+  "diameter_mm": 21.1,
+  "height_mm": 70.8,
+  "cp_j_kgk": 1000.0,
+  "heat_factor": 1.0,
+  "t_charge_min_c": 0.0,
+  "t_charge_max_c": 45.0,
+  "t_discharge_max_c": 60.0,
+  "cycle_life_ref": 800.0,
+  "aging_ea_over_r_k": 3600.0,
+  "cost_inr": 320.0,
+  "ocv_soc": [
+    0.0,
+    0.05,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "ocv_v": [
+    2.9674,
+    3.2128,
+    3.4004,
+    3.5018,
+    3.5849,
+    3.6516,
+    3.7425,
+    3.8527,
+    3.9336,
+    4.051,
+    4.1312,
+    4.1822
+  ],
+  "sources": [
+    "Electrical/thermal limits typical of 5 Ah high-energy 21700 datasheets (e.g. INR21700-50E class) — verify against the exact datasheet used",
+    "OCV, R0, R1, tau, r_temp_k fitted and capacity measured on LG INR21700 M50LT proxy cell, TU Berlin Internal Temperature Dataset (DOI 10.14279/depositonce-25110, CC BY 4.0): US06, HWFET and 1C CC-CV charge at 25 and 35 °C; hold-out at 45 °C — see data/validation/calibration_nmc21700_5ah.json"
+  ],
+  "assumptions": [
+    {
+      "id": "C-NMC-3",
+      "text": "Cycle life 800 cycles to 80% SOH at 25 °C is a placeholder",
+      "source": "team assumption",
+      "affects": [
+        "cell"
+      ]
+    },
+    {
+      "id": "C-NMC-4",
+      "text": "Cell price ₹320 is a placeholder; replace with a supplier quote",
+      "source": "team assumption",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "C-NMC-CAL",
+      "text": "OCV, R0, R1, tau, Arrhenius coefficient and capacity measured on a proxy cell (LG M50LT, drilled for an internal thermocouple) at 25–35 °C; hold-out checked at 45 °C. Not the cell that would be bought",
+      "source": "DOI 10.14279/depositonce-25110",
+      "affects": [
+        "cell",
+        "electrical",
+        "thermal"
+      ]
+    }
+  ]
+}
