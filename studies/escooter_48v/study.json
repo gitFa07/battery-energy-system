@@ -1,0 +1,35 @@
+{
+  "application": "48 V battery pack for an urban e-scooter in hot Indian climate (40 °C ambient)",
+  "ambient_c": 40,
+  "scenarios": {
+    "charge": {"type": "charge", "start_soc": 0.1, "max_time_s": 28800, "after": "drive"},
+    "drive": {
+      "type": "drive",
+      "start_soc": 1.0,
+      "max_time_s": 21600,
+      "profile": [[20, 2500], [60, 900], [15, 3000], [90, 700], [30, 0], [45, 1500], [40, 0]]
+    }
+  },
+  "requirements": [
+    {"id": "REQ-01", "text": "Nominal voltage fits 48 V motor controller", "metric": "v_nom", "min": 44, "max": 56, "unit": "V", "priority": "must"},
+    {"id": "REQ-02", "text": "Usable energy on urban cycle at 40 °C", "metric": "usable_energy_wh", "min": 2000, "unit": "Wh", "priority": "must"},
+    {"id": "REQ-03", "text": "Cell temperature within charge window", "metric": "t_max_charge_c", "max": 45, "unit": "°C", "priority": "must"},
+    {"id": "REQ-04", "text": "Cell temperature margin while riding", "metric": "t_max_drive_c", "max": 55, "unit": "°C", "priority": "must"},
+    {"id": "REQ-05", "text": "Charge time after a ride, plug-in to 80% (incl. thermal hold)", "metric": "charge_time_min", "max": 120, "unit": "min", "priority": "should"},
+    {"id": "REQ-06", "text": "Cell-to-cell temperature uniformity", "metric": "delta_t_c", "max": 5, "unit": "K", "priority": "should"},
+    {"id": "REQ-07", "text": "BMS sees the hottest cell", "metric": "sensor_blind_spot_c", "max": 3, "unit": "K", "priority": "should"},
+    {"id": "REQ-08", "text": "Pack mass", "metric": "mass_kg", "max": 16, "unit": "kg", "priority": "should"},
+    {"id": "REQ-09", "text": "Pack volume", "metric": "volume_l", "max": 12, "unit": "L", "priority": "should"},
+    {"id": "REQ-10", "text": "Pack cost", "metric": "cost_inr", "max": 60000, "unit": "₹", "priority": "should"},
+    {"id": "REQ-11", "text": "Cycle life in hot climate", "metric": "cycle_life_est", "min": 1000, "unit": "cycles", "priority": "should"}
+  ],
+  "score_weights": {
+    "usable_energy_wh": 2,
+    "charge_time_min": -2,
+    "t_max_charge_c": -2,
+    "cycle_life_est": 2,
+    "mass_kg": -1,
+    "volume_l": -1,
+    "cost_per_kwh_inr": -2
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "id": "baseline",
+  "name": "Baseline — NMC 13S10P, passive",
+  "description": "Typical low-cost e-scooter pack: high-energy NMC 21700, plastic holders, sealed enclosure, 2 NTCs at the edge, 0.5C charge.",
+  "cell": "nmc21700_5ah",
+  "topology": {"series": 13, "parallel": 10},
+  "interconnect": {
+    "cell_tab_resistance_ohm": 0.002,
+    "string_resistance_ohm": 0.010,
+    "busbar_ampacity_a": 120,
+    "fuse_rating_a": 100
+  },
+  "cooling": {
+    "type": "passive",
+    "h_eff_w_m2k": 2.0,
+    "edge_factor": 2.5,
+    "g_neighbor_w_k": 0.10
+  },
+  "sensing": {"n_temp_sensors": 2, "placement": "edge"},
+  "bms": {"max_series": 16, "cost_inr": 3500, "mass_kg": 0.3},
+  "protection": {
+    "ov_cell_v": 4.22,
+    "uv_cell_v": 2.9,
+    "ot_charge_c": 45,
+    "ot_discharge_c": 60,
+    "oc_discharge_a": 100
+  },
+  "control": {
+    "charge_c_rate": 0.5,
+    "cv_v_cell": 4.15,
+    "cutoff_c_rate": 0.05,
+    "derate_start_c": 42,
+    "derate_end_c": 45
+  },
+  "mechanical": {
+    "holder_busbar_mass_per_cell_kg": 0.012,
+    "enclosure_mass_kg": 1.5,
+    "packing_fraction": 0.785,
+    "volume_overhead_factor": 1.4
+  },
+  "costs": {
+    "holder_busbar_per_cell_inr": 25,
+    "assembly_per_cell_inr": 15,
+    "enclosure_inr": 2000
+  },
+  "variation": {"capacity_sigma": 0.015, "r0_sigma": 0.04, "seed": 0},
+  "assumptions": [
+    {"id": "A-01", "text": "Ambient 40 °C; ride starts at ambient; charger is plugged in immediately after the ride (pack still hot)", "affects": ["thermal", "control"]},
+    {"id": "A-02", "text": "Drive profile is a synthetic repeating urban power cycle (not a homologation cycle)", "affects": ["electrical", "thermal"]},
+    {"id": "A-03", "text": "Passive enclosure: effective h=2 W/m²K per cell surface, edge cells 2.5x better cooled", "affects": ["thermal"]},
+    {"id": "A-04", "text": "Cell-to-cell conductance 0.10 W/K through holders and busbars", "affects": ["thermal"]},
+    {"id": "A-05", "text": "Cell variation σ: capacity 1.5%, resistance 4% (fresh, unbinned cells)", "affects": ["cell", "electrical", "thermal"]},
+    {"id": "A-06", "text": "Holder, busbar, enclosure, BMS masses and costs are placeholders", "affects": ["mechanical", "cost"]},
+    {"id": "A-07", "text": "Ageing: datasheet cycle life scaled by Arrhenius on mean cell temperature only", "affects": ["cell"]}
+  ]
+}

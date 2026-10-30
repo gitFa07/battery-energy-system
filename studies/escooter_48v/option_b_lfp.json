@@ -1,0 +1,17 @@
+{
+  "extends": "baseline.json",
+  "id": "option_b",
+  "name": "Option B — LFP 16S8P, passive",
+  "description": "Safer, longer-life LFP 32700 cells; heavier and bulkier. 1C charge (the cell's 6 A limit) with derating. 4 NTCs spread across the pack.",
+  "cell": "lfp32700_6ah",
+  "topology": {"series": 16, "parallel": 8},
+  "sensing": {"n_temp_sensors": 4, "placement": "spread"},
+  "bms": {"max_series": 16, "cost_inr": 4000, "mass_kg": 0.3},
+  "protection": {"ov_cell_v": 3.65, "uv_cell_v": 2.6},
+  "control": {"charge_c_rate": 1.0, "cv_v_cell": 3.6},
+  "costs": {"holder_busbar_per_cell_inr": 30},
+  "mechanical": {"holder_busbar_mass_per_cell_kg": 0.018},
+  "assumptions": [
+    {"id": "A-B1", "text": "Larger 32700 holders: +6 g and +₹5 per cell vs 21700 (placeholder)", "affects": ["mechanical", "cost"]}
+  ]
+}

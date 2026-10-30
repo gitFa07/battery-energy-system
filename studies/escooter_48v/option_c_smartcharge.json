@@ -1,0 +1,17 @@
+{
+  "extends": "baseline.json",
+  "id": "option_c",
+  "name": "Option C — baseline + virtual hotspot sensor",
+  "description": "Software-only: same hardware as baseline. BMS runs a nominal thermal model of the pack, corrected by the 2 edge NTCs, and derates on the estimated hotspot; allows ~1C when the pack is cool.",
+  "control": {
+    "charge_c_rate": 0.95,
+    "derate_on": "observer",
+    "derate_start_c": 43.5,
+    "derate_end_c": 44.5,
+    "observer_h_error": 0.0
+  },
+  "assumptions": [
+    {"id": "A-C1", "text": "BMS MCU can run a 130-node thermal model at 0.5 Hz (no BOM change)", "affects": ["control", "cost"]},
+    {"id": "A-C2", "text": "Observer uses nominal cell parameters and equal current sharing; robustness checked for ±30 % cooling-model error", "affects": ["control", "thermal"]}
+  ]
+}

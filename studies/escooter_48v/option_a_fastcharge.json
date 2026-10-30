@@ -1,0 +1,21 @@
+{
+  "extends": "baseline.json",
+  "id": "option_a",
+  "name": "Option A — NMC + Al conduction plate, 0.95C",
+  "description": "Same cells; potted onto an aluminium plate that forms the enclosure base, 6 NTCs at the thermal centre, 0.95C charge (just under the cell's 4.9 A limit) with derating.",
+  "cooling": {
+    "type": "conduction_plate",
+    "h_eff_w_m2k": 12.0,
+    "edge_factor": 1.2,
+    "g_neighbor_w_k": 0.30,
+    "mass_kg": 1.2,
+    "volume_l": 0.6,
+    "cost_inr": 2500
+  },
+  "sensing": {"n_temp_sensors": 6, "placement": "center"},
+  "control": {"charge_c_rate": 0.95},
+  "assumptions": [
+    {"id": "A-A1", "text": "Al plate + thermal pad gives effective h=12 W/m²K per cell surface to ambient", "affects": ["thermal"]},
+    {"id": "A-A2", "text": "Plate adds 1.2 kg, 0.6 L and ₹2,500 (placeholder)", "affects": ["mechanical", "cost"]}
+  ]
+}
