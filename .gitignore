@@ -14,3 +14,6 @@ Case Study 2_IDV_Battery_Energy_System.pdf
 # Generated reports
 *_report.html
 packforge_report.html
+
+# Demo GIF backups (large; kept local, see docs/DEMO_SCRIPT.md)
+docs/backup/*.gif
