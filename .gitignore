@@ -9,6 +9,10 @@ __pycache__/
 .Agents
 .claude
 
+#Docs
+battery_energy_system_studio_implementation_plan.md
+TASK.md
+
 # Downloaded datasets and their conversions (~0.7 GB; see data/validation/SOURCES.md to re-create)
 data/raw/
 
