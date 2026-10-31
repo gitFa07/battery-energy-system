@@ -79,7 +79,8 @@ margin): higher measured resistance → more current for the same power.
 
 - ✅ **Pitch deck** (slides artifact, 18 slides, team edits) · **demo script + backup-clip shot list**
   (`docs/DEMO_SCRIPT.md`) · CLI output and offline report in `docs/backup/`
-- 🔜 Record the backup clip (shot list in `docs/DEMO_SCRIPT.md`); fill the deck's `[placeholders]`
+- ✅ Deck final: names and contacts filled, slides checked visually; 3 silent demo GIFs in `docs/backup/` (local)
+- 🔜 Team: record the full backup clip (shot list in `docs/DEMO_SCRIPT.md`), rehearse, export the deck as PDF
 - 🔜 **Live-demo path:**
   1. baseline after a ride → 48 min hold, then REQ-03 fails; heat map shows the interior hotspot vs edge NTCs
   2. Option C (observer) → passes, but slower — the honest trade-off
