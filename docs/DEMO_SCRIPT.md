@@ -15,7 +15,8 @@ root with the venv. Terms follow `GLOSSARY.md`: say *pack*, *thermal hold*, *bli
 3. Set the starting state: sidebar **Designs** = `baseline` only. Ambient 40 °C. Toggle **on**. Heat × 1.0.
    Tab: **Compare**.
 4. Open in other windows, ready to switch to: the backup clip, `docs/backup/packforge_report.html`, and
-   `docs/backup/cli_output.txt`. Keep the deck downloaded as a PDF (the web deck needs internet for its fonts).
+   `docs/backup/cli_output.txt`. Present from `docs/PackForge_pitch.pptx`, which works offline with standard Office fonts. The web deck needs
+   internet for its fonts.
 
 ## The demo
 
