@@ -7,10 +7,10 @@ requirements, find the conflicts between subsystems, and recommend one with its 
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B?logo=streamlit&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-23%20passing-2ea44f)
+![Tests](https://img.shields.io/badge/tests-24%20passing-2ea44f)
 ![Data](https://img.shields.io/badge/validation%20data-CC%20BY%204.0-lightgrey)
 
-[Overview](#overview) · [Key results](#key-results) · [Getting started](#getting-started) ·
+[Overview](#overview) · [Key results](#key-results) · [Walkthrough](#walkthrough) · [Getting started](#getting-started) ·
 [Usage](#usage) · [How it works](#how-it-works) · [Evidence](#evidence-and-validation) ·
 [Extending](#extending-packforge)
 
@@ -68,6 +68,77 @@ retrofit for 2-NTC packs already built. C is safe but slower after a hot ride.
 > the charge limit by 0.02 K and A becomes the pick. The next step is one LFP charge test through the same fit
 > pipeline. No design is claimed to be AIS-156 compliant.
 
+## Walkthrough
+
+The e-scooter study, step by step in the workbench UI. Start it with `.venv/Scripts/streamlit run app.py`, keep
+only **baseline** under **Designs**, and leave ambient at 40 °C with **Charge right after the ride** on. The steps
+follow the live demo in [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).
+
+### 1. The baseline fails after a ride
+
+![Baseline alone: headline "No design meets every must requirement" and one solid orange circle under REQ-03](docs/screenshots/baseline_fails.png)
+
+The page leads with its verdict. Each circle in the grid is one check. The solid orange one is REQ-03: the hottest
+cell reaches 47.6 °C while charging, against a 45 °C limit, and a failed *must* requirement disqualifies the
+design. Rings are warnings. Hover a circle to see the check and its result. Turn **Charge right after the ride**
+off and the same pack passes at 44.7 °C, so the hot plug-in is what breaks it.
+
+### 2. Find where the heat is
+
+![Heat map of the 13×10 baseline pack at the end of the ride: hot interior near 53 °C, sensor rings on two corner cells](docs/screenshots/heat_map.png)
+
+**Heat map** shows every cell at the moment the hottest one peaked. After the ride the interior cells run near
+53 °C. The two BMS sensors (rings) sit on corner cells, which cool first.
+
+### 3. Compare the hottest cell with what the BMS sees
+
+![Time series during the charge: hottest cell temperature on top, the BMS hotspot view below it, lower throughout](docs/screenshots/bms_view.png)
+
+**Time series** puts the hottest cell (top) above the temperature the BMS acts on (bottom). The BMS reads low for
+the whole charge, by up to 3.2 K. It holds charging for 48 min, then charges while the hottest cell is still above
+45 °C. No alarm fires and nothing trips.
+
+### 4. Read the cause chain and the fixes
+
+![Conflicts tab: REQ-03 expanded with subsystems, the cause chain and three candidate fixes](docs/screenshots/conflicts.png)
+
+**Conflicts** lists every failure and warning with the subsystems involved, the cause chain and candidate fixes.
+The first fix, derating on a thermal observer, is what Option C does in firmware only.
+
+### 5. Add the options and get a recommendation
+
+![All four designs: "Recommended: Option B", the two alternatives under it, and the grid ranked B, A, C, Baseline](docs/screenshots/recommendation.png)
+
+Add `option_a_fastcharge`, `option_b_lfp` and `option_c_smartcharge`. PackForge recommends **B** (LFP), names
+**A** as the pick if mass and volume are hard limits, and **C** as a ₹0 retrofit for packs already built. The
+grid ranks the designs by score; Baseline stays disqualified.
+
+![Compare tab: KPI table with evidence level per row, requirement limits under each KPI, and orange marks on the values that miss](docs/screenshots/compare_kpis.png)
+
+**Compare** gives every KPI with its evidence level and the requirement it is checked against. Values that miss a
+limit carry the same marks as the grid.
+
+### 6. Check the model against measured data
+
+![Validation tab: hold-out error tiles, then a 45 °C hold-out charge replayed through the calibrated model, voltage and temperature](docs/screenshots/validation.png)
+
+**Validation** shows how the calibrated NMC cell model does on 45 °C logs the fit never saw. The replay above is
+a hold-out charge: 17 mV voltage error, but the model under-predicts the temperature rise about 2×. The tab also
+states that the LFP cell is not validated.
+
+### 7. Stress the recommendation
+
+![Unmodelled heat at 2.0: headline switches to "Recommended: Option A", and Option B now fails REQ-03](docs/screenshots/heat_2x.png)
+
+Because the temperature rise is under-predicted, set **Unmodelled heat ×** to 2.0. Every cell now makes twice the
+modelled heat and the BMS is not told. B misses the charge limit by 0.02 K and the recommendation switches to A.
+One LFP charge test settles which one to build.
+
+### 8. Take the report
+
+**Download report (HTML)**, top right, saves the KPIs, conflicts, recommendation, the 2× heat re-run and the
+validation as one offline file. Set the heat factor back to 1.0 first: the report captures what is on screen.
+
 ## Getting started
 
 ### Prerequisites
@@ -93,13 +164,15 @@ python -m venv .venv
 .venv/Scripts/streamlit run app.py
 ```
 
-The sidebar picks the study and designs. It also sets ambient temperature, whether the charge starts right after
+Above the tabs, the page leads with the recommendation and a requirement grid: one row per design, ranked, and one
+circle per requirement or interface rule (solid orange = fail, ring = warning, grey = pass). The sidebar picks the
+study and designs. It also sets ambient temperature, whether the charge starts right after
 the ride, and the **Unmodelled heat ×** factor. A what-if panel varies parallel count, C-rate, derating window,
 cooling and sensor layout.
 
 | Tab | Shows |
 |---|---|
-| Compare | KPI table with evidence levels, trade-off radar, ranking |
+| Compare | KPI table with evidence levels and the requirement each KPI is checked against, trade-off radar |
 | Time series | Charge and drive signals per design, with BMS events |
 | Heat map | Cell temperatures at the peak, with BMS sensor positions |
 | Conflicts | Failures and warnings with cause chains and candidate fixes |
@@ -155,11 +228,11 @@ parameter exchange".
   hand-calc thermal-limit bound that the simulation must track.
 
 ```
-packforge/   schema · loader · sim · metrics · checks · engine · fit · figures · report · CLI
+packforge/   schema · loader · sim · metrics · checks · engine · fit · figures · ui · report · CLI
 app.py       Streamlit UI (rendering only)
 data/cells/  cell JSON (id = file name)          studies/<name>/  study.json + one JSON per design option
 data/validation/  logs, calibration record, SOURCES.md          scripts/  data conversion and calibration
-docs/        demo script and offline backups      tests/  physics, checks, calibration, recommendations
+docs/        demo script, screenshots, offline backups      tests/  physics, checks, calibration, recommendations
 ```
 
 ## Evidence and validation
