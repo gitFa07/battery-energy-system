@@ -1,0 +1,74 @@
+# Colours follow the pitch deck (docs/deck-src/build.js): navy headings, blue accent, orange = alert (fail / hot).
+# Barlow (OFL, static/fonts/OFL.txt) ships with the app so the demo renders the same offline.
+[server]
+enableStaticServing = true
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+font = "Barlow, sans-serif"
+headingFont = "Barlow Semi Condensed, Barlow, sans-serif"
+headingFontWeights = [600, 600, 600, 600, 600, 600]
+headingFontSizes = ["2.25rem", "1.5rem", "1.2rem", "1rem", "1rem", "1rem"]
+baseFontSize = 16
+baseRadius = "4px"
+buttonRadius = "4px"
+showWidgetBorder = true
+showSidebarBorder = true
+chartCategoricalColors = ["#2E75B6", "#1B9E77", "#C9A227", "#8E6BBF", "#D46A9F", "#6B7280"]
+
+[[theme.fontFaces]]
+family = "Barlow"
+url = "app/static/fonts/Barlow-Regular.ttf"
+weight = "400"
+[[theme.fontFaces]]
+family = "Barlow"
+url = "app/static/fonts/Barlow-Medium.ttf"
+weight = "500"
+[[theme.fontFaces]]
+family = "Barlow"
+url = "app/static/fonts/Barlow-SemiBold.ttf"
+weight = "600"
+[[theme.fontFaces]]
+family = "Barlow"
+url = "app/static/fonts/Barlow-Bold.ttf"
+weight = "700"
+[[theme.fontFaces]]
+family = "Barlow Semi Condensed"
+url = "app/static/fonts/BarlowSemiCondensed-SemiBold.ttf"
+weight = "600"
+
+[theme.light]
+primaryColor = "#2E75B6"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#EDF1F5"
+textColor = "#1B2733"
+borderColor = "#D0D5DB"
+redColor = "#C2410C"
+orangeColor = "#C2410C"
+blueColor = "#2E75B6"
+greenColor = "#1B7F5A"
+linkColor = "#1F4E79"
+dataframeHeaderBackgroundColor = "#EDF1F5"
+
+[theme.light.sidebar]
+backgroundColor = "#EDF1F5"
+secondaryBackgroundColor = "#FFFFFF"
+
+[theme.dark]
+primaryColor = "#5B9BD5"
+backgroundColor = "#0F1720"
+secondaryBackgroundColor = "#18222E"
+textColor = "#E3E8EE"
+borderColor = "#2B3846"
+redColor = "#F07B3F"
+orangeColor = "#F07B3F"
+blueColor = "#5B9BD5"
+greenColor = "#3FB68B"
+linkColor = "#8FBCE6"
+dataframeHeaderBackgroundColor = "#18222E"
+
+[theme.dark.sidebar]
+backgroundColor = "#141E29"
+secondaryBackgroundColor = "#0F1720"

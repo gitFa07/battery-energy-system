@@ -1,4 +1,6 @@
 
+import re
+
 import numpy as np
 import pytest
 
@@ -152,6 +154,23 @@ def test_report_contains_recommendation_and_traceability(study_and_results):
     study, results = study_and_results
     html = build_report(list(results.values()), study)
     assert "Recommended:" in html and "REQ-03" in html and "A-C2" in html and html.count("<table") >= 6
+
+
+def test_ui_grid_and_verdict(study_and_results):
+    from packforge import ui
+    from packforge.engine import recommend
+    from packforge.metrics import KPIS
+
+    study, results = study_and_results
+    rs = list(results.values())
+    recs = recommend(rs, study)
+    grid = ui.requirement_grid(rs, rank(rs, study), study, recs[0].design_id)
+    n_checks = len(rs[0].findings)
+    assert len(re.findall(r'class="c (?:pass|warn|fail)"', grid)) == n_checks * len(rs)
+    assert grid.count('class="c fail"') == 1 and "disqualified" in grid  # baseline REQ-03 after a ride
+    assert "Recommended: Option B" in ui.verdict(recs, rs)
+    assert "No design meets" in ui.verdict([], rs)
+    assert ui.kpi_table(rs, study).count("<tr>") == len(KPIS) + 1
 
 
 def test_charge_time_includes_thermal_hold(study_and_results):

@@ -23,6 +23,7 @@ th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertic
 th{color:var(--mut);font-weight:600}.wrap{overflow-x:auto}
 .rec{border-left:4px solid var(--ok);padding:8px 12px;background:color-mix(in srgb,var(--ok) 8%,transparent)}
 .fail{color:var(--bad)}.warn{color:var(--warn)}
+.plotly-graph-div{background:#fff;border-radius:4px;margin:12px 0}
 """
 
 

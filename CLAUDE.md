@@ -36,9 +36,11 @@ packforge/
   engine.py    run_scenarios (honours chains), run_design, monte_carlo, rank, recommend, traceability
   fit.py       fit cell params (+ r_temp_k, OCV) to measured logs by replaying them through sim.py; hold-out eval
   figures.py   plotly figures shared by UI and report
+  ui.py        HTML for the UI: verdict headline, requirement grid (designs × checks), KPI table
   report.py    self-contained HTML design report
   __main__.py  CLI
 app.py         Streamlit UI (Compare · Time series · Heat map · Conflicts · Traceability · Monte Carlo · Validation)
+.streamlit/    theme (deck colours, light + dark) and bundled Barlow fonts from static/fonts/ (OFL)
 data/cells/    cell JSON (id = filename); `<id>_fitted.json` from `fit --save`; `<id>_uncalibrated.json` = pre-calibration
 data/validation/  logs (CSV: time_s, current_a [+ = discharge], voltage_v, temp_c [, temp_core_c, soc, ambient_c]),
                `calibration_<cell id>.json` (fit + hold-out record, read by UI/report), SOURCES.md (licences)
@@ -116,13 +118,14 @@ chained charge starts from drive end state · hot plug-in fails baseline REQ-03 
 observer stays ≤ 45 °C at ±30 % model error · sim vs hand-calc bound · conflict detection (IF-01, OT trip → IF-14) ·
 ranking puts eligible designs first · MC batch == single run · fit recovers synthetic params (from the
 `_uncalibrated` cell) · calibrated cell predicts two 45 °C hold-out logs · charge time ≥ hold + 10–80 % ·
-recommend() roles · replay starts hot · extra heat only makes designs hotter · report content.
+recommend() roles · replay starts hot · extra heat only makes designs hotter · report content · UI grid/verdict.
 Add a test for every new rule or model.
 
 ## Style
 - Python 3.10, type hints, `from __future__ import annotations`, numpy vectorised (no per-cell Python loops).
 - Short module docstrings stating the model/equations; comments only for non-obvious physics.
-- Keep the UI thin: logic in `packforge/`, figures in `figures.py`; `app.py` only renders.
+- Keep the UI thin: logic in `packforge/`, figures in `figures.py`, HTML in `ui.py`; `app.py` only renders.
+  In `ui.py` colours come from `currentColor` so markup reads on both themes; only failures get colour.
 - Cache in the UI with `st.cache_data` keyed on `model_dump_json()`; use `width="stretch"`, not
   `use_container_width`.
 
