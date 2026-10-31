@@ -5,6 +5,10 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 
+#Agents
+.Agents
+.claude
+
 # Downloaded datasets and their conversions (~0.7 GB; see data/validation/SOURCES.md to re-create)
 data/raw/
 

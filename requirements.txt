@@ -1,0 +1,15 @@
+# Core dependencies (PackForge battery design workbench)
+numpy>=1.26
+scipy>=1.11
+pydantic>=2.6
+pandas>=2.0
+plotly>=5.20
+streamlit>=1.35
+
+# Data handling & validation (parquet support for TU Berlin dataset conversion)
+pyarrow>=14.0
+
+# Testing & development
+# Note: pytest 9.2.0 crashes with INTERNALERROR; keep <9.2 as specified in pyproject.toml
+pytest>=8.0,<9.2
+
