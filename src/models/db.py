@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import threading
 from pathlib import Path
 from typing import TypeVar
 
@@ -37,7 +38,9 @@ class DatasheetDB:
 
     def __init__(self, path: str | Path = ":memory:", datasheet_dir: Path = DATASHEET_DIR, seed: bool = True):
         self.datasheet_dir = datasheet_dir
-        self.conn = sqlite3.connect(str(path))
+        # one connection shared by API worker threads; every query takes the lock
+        self.conn = sqlite3.connect(str(path), check_same_thread=False)
+        self._lock = threading.Lock()
         for table in (*CATALOGUE, "targets"):
             self.conn.execute(f"CREATE TABLE IF NOT EXISTS {table} "
                               "(id TEXT PRIMARY KEY, name TEXT NOT NULL, payload TEXT NOT NULL)")
@@ -52,7 +55,7 @@ class DatasheetDB:
             rows[table] = [(m.id, m.name, m.model_dump_json()) for m in items]
         targets = load_json("presets_three_way.json", self.datasheet_dir)["round1_targets"]
         rows["targets"] = [(pid, pid, json.dumps(t)) for pid, t in targets.items()]
-        with self.conn:
+        with self._lock, self.conn:
             for table, table_rows in rows.items():
                 self.conn.execute(f"DELETE FROM {table}")
                 self.conn.executemany(f"INSERT INTO {table} VALUES (?, ?, ?)", table_rows)
@@ -61,11 +64,13 @@ class DatasheetDB:
         self.conn.close()
 
     def _all(self, table: str, model: type[M]) -> list[M]:
-        cur = self.conn.execute(f"SELECT payload FROM {table} ORDER BY rowid")
-        return [model.model_validate_json(p) for (p,) in cur]
+        with self._lock:
+            payloads = self.conn.execute(f"SELECT payload FROM {table} ORDER BY rowid").fetchall()
+        return [model.model_validate_json(p) for (p,) in payloads]
 
     def _one(self, table: str, model: type[M], id: str) -> M:
-        row = self.conn.execute(f"SELECT payload FROM {table} WHERE id = ?", (id,)).fetchone()
+        with self._lock:
+            row = self.conn.execute(f"SELECT payload FROM {table} WHERE id = ?", (id,)).fetchone()
         if row is None:
             raise KeyError(f"no {table} entry with id {id!r}")
         return model.model_validate_json(row[0])
@@ -99,5 +104,6 @@ class DatasheetDB:
 
     def get_targets(self) -> dict[str, dict]:
         """Round-1 target results per preset id (targets to compare against, not model outputs)."""
-        cur = self.conn.execute("SELECT id, payload FROM targets ORDER BY rowid")
-        return {pid: json.loads(p) for pid, p in cur}
+        with self._lock:
+            rows = self.conn.execute("SELECT id, payload FROM targets ORDER BY rowid").fetchall()
+        return {pid: json.loads(p) for pid, p in rows}

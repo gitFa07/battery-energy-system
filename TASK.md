@@ -105,21 +105,22 @@
 ---
 
 ### Phase 4: FastAPI Backend Service
-- **Status:** Pending
+- **Status:** Done
 - **Objective:** Expose the simulation, comparison, conflict validation, and traceability engines through documented REST API endpoints.
+- **Implementation notes:** Endpoints share `src/pipeline.py` (simulate → conflicts → rank → trace) with the workbench and report. Unknown datasheet ids → 404, schema errors/extra fields/duplicate ids → 422. `/simulate` can return down-sampled time series. Run: `.venv/Scripts/uvicorn src.api.main:app` (OpenAPI docs at /docs).
 - **Sub-tasks:**
-  - [ ] Implement FastAPI application with CORS, exception handling, and endpoints:
+  - [x] Implement FastAPI application with CORS, exception handling, and endpoints:
     - `GET /api/v1/health`: System health and engine status.
     - `GET /api/v1/datasheets`: Available cells, cooling topologies, busbars, BMS options, and requirements.
     - `POST /api/v1/simulate`: Run multi-physics simulation, conflict check, and traceability generation for any custom `ModuleDesignInput`.
     - `POST /api/v1/compare`: Multi-design comparison matrix, radar metrics, and TOPSIS recommendation.
     - *Target File:* `src/api/main.py`
-  - [ ] Implement API package initialization.
+  - [x] Implement API package initialization.
     - *Target File:* `src/api/__init__.py`
-  - [ ] Write integration test suite using `httpx.TestClient`.
+  - [x] Write integration test suite using `httpx.TestClient`.
     - *Target File:* `tests/test_api.py`
 - **Verification Commands:**
-  - [ ] `pytest tests/test_api.py -v` (Verify status codes, request validation, and JSON payload fidelity across all endpoints)
+  - [x] `pytest tests/test_api.py -v` (Verify status codes, request validation, and JSON payload fidelity across all endpoints)
 
 ---
 
@@ -189,7 +190,7 @@
 | **Phase 1** | Scaffolding, Schemas & Datasheets | Schemas, SQLite loader, LiionDB datasheets | **Done** |
 | **Phase 2** | Multi-Physics Engine | PyBaMM, Electrical, Thermal, Mechanical, BOM | **Done** |
 | **Phase 3** | Conflict & Traceability Engine | 3 Rules, Traceability Graph, TOPSIS | **Done** |
-| **Phase 4** | FastAPI Backend Service | REST Endpoints, API Tests | **Pending** |
+| **Phase 4** | FastAPI Backend Service | REST Endpoints, API Tests | **Done** |
 | **Phase 5** | Interactive Scenario Workbench | Streamlit UI, 4 Plotly Charts | **Pending** |
 | **Phase 6** | Compliance Report & 1S-4P Test | Report Generator, Scaled Lab Protocol | **Pending** |
 | **Phase 7** | E2E Integration & Demo Readiness | `run_demo.py`, Full Documentation | **Pending** |
