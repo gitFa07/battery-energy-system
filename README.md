@@ -100,7 +100,7 @@ the whole charge, by up to 3.2 K. It holds charging for 48 min, then charges whi
 
 ### 4. Read the cause chain and the fixes
 
-![Issues and fixes tab: REQ-03 expanded with subsystems, the cause chain and three candidate fixes](docs/screenshots/conflicts.png)
+![Issues and fixes tab: REQ-03 expanded with subsystems, the cause chain and three possible fixes](docs/screenshots/conflicts.png)
 
 **Issues and fixes** lists every failure and warning with the subsystems involved, the cause chain and candidate fixes.
 The first fix, derating on a thermal observer, is what Option C does in firmware only.
