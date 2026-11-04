@@ -25,6 +25,17 @@ PYTHONPATH=scripts .venv/Scripts/python scripts/calibrate_nmc.py    # NMC calibr
 pytest 9.2.0 crashes with `INTERNALERROR ... NodeId ... _str_cache` here — keep `pytest<9.2` (pinned).
 Scripts that print must call `sys.stdout.reconfigure(encoding="utf-8")` — output contains °C, ₹, Δ.
 
+## VoltTwin (`src/`) — second implementation from `TASK.md`, side by side with PackForge
+```
+.venv/Scripts/python -m pip install -e ".[dev,volttwin]"   # FastAPI, uvicorn, PyBaMM, httpx
+.venv/Scripts/python run_demo.py --cli-only                 # exit 0 = verdicts match Round-1
+.venv/Scripts/streamlit run src/workbench/app.py   ·   .venv/Scripts/uvicorn src.api.main:app
+```
+Shares no code with `packforge/`. Costs in $ (as TASK.md), datasheets in `data/datasheets/*.json` (SQLite is a cache).
+Round-1 numbers in `presets_three_way.json` are *targets*: compared with tolerance, gaps listed with reasons in
+`src/physics/targets.py` — never tune parameters to hit them. Its cell model under-predicts measured heat 2–4×
+(`src/physics/replay.py`), so keep the heat-factor robustness sweep visible wherever the recommendation is shown.
+
 ## Layout
 ```
 packforge/

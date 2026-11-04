@@ -172,17 +172,18 @@
 ---
 
 ### Phase 7: End-to-End Integration, Reproducibility Script & Round 2 Demo Readiness
-- **Status:** Pending
+- **Status:** Done
 - **Objective:** Ensure single-command reproducibility and automated demo execution for TELIPORT Round 2 judges.
+- **Implementation notes:** `run_demo.py` re-seeds `data/datasheets/volttwin.db` (gitignored), verifies verdicts against Round-1 (exit 1 on mismatch), prints comparison/conflicts/robustness, optionally writes the report (`--report`) and launches API + workbench. README gained a VoltTwin section (PackForge content kept). Full suite: 92 passed (24 PackForge + 68 VoltTwin), ~100 s.
 - **Sub-tasks:**
-  - [ ] Create automated demo runner script that seeds SQLite, runs benchmark verification, prints comparison and conflict summaries, and launches services.
+  - [x] Create automated demo runner script that seeds SQLite, runs benchmark verification, prints comparison and conflict summaries, and launches services.
     - *Target File:* `run_demo.py`
-  - [ ] Update `README.md` with complete architecture guide, mathematical derivations, installation steps, and known limitations.
+  - [x] Update `README.md` with complete architecture guide, mathematical derivations, installation steps, and known limitations.
     - *Target File:* `README.md`
-  - [ ] Run full end-to-end test suite across all subsystems.
+  - [x] Run full end-to-end test suite across all subsystems.
 - **Verification Commands:**
-  - [ ] `pytest -v` (Confirm 100% test pass rate across all test modules)
-  - [ ] `python run_demo.py --cli-only` (Verify automated CLI demonstration execution)
+  - [x] `pytest -v` (Confirm 100% test pass rate across all test modules)
+  - [x] `python run_demo.py --cli-only` (Verify automated CLI demonstration execution)
 
 ---
 
@@ -195,5 +196,5 @@
 | **Phase 4** | FastAPI Backend Service | REST Endpoints, API Tests | **Done** |
 | **Phase 5** | Interactive Scenario Workbench | Streamlit UI, 4 Plotly Charts | **Done** |
 | **Phase 6** | Compliance Report & 1S-4P Test | Report Generator, Scaled Lab Protocol | **Done** |
-| **Phase 7** | E2E Integration & Demo Readiness | `run_demo.py`, Full Documentation | **Pending** |
+| **Phase 7** | E2E Integration & Demo Readiness | `run_demo.py`, Full Documentation | **Done** |
 

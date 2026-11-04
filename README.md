@@ -7,12 +7,12 @@ requirements, find the conflicts between subsystems, and recommend one with its 
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B?logo=streamlit&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-24%20passing-2ea44f)
+![Tests](https://img.shields.io/badge/tests-92%20passing-2ea44f)
 ![Data](https://img.shields.io/badge/validation%20data-CC%20BY%204.0-lightgrey)
 
 [Overview](#overview) · [Key results](#key-results) · [Walkthrough](#walkthrough) · [Getting started](#getting-started) ·
 [Usage](#usage) · [How it works](#how-it-works) · [Evidence](#evidence-and-validation) ·
-[Extending](#extending-packforge)
+[Extending](#extending-packforge) · [VoltTwin Studio](#volttwin-studio-src)
 
 </div>
 
@@ -289,8 +289,74 @@ A design option only needs its differences from the baseline:
 }
 ```
 
+## VoltTwin Studio (`src/`)
+
+VoltTwin is a second, simpler implementation of the same brief, built phase by phase from
+[`TASK.md`](TASK.md). It lives next to PackForge and shares no code with it. It covers a three-way study (baseline
+NMC + passive air, option A LFP + forced air, option B NMC + Al-fin/PCM) with seven hard requirements, a coupled
+physics engine, conflict rules, TOPSIS ranking, a REST API, a Streamlit workbench, a report and a 1S-4P bench
+protocol.
+
+```bash
+.venv/Scripts/python -m pip install -e ".[dev,volttwin]"       # adds FastAPI, uvicorn, PyBaMM, httpx
+.venv/Scripts/python run_demo.py --cli-only                     # terminal demo; exit 0 = verdicts match Round-1
+.venv/Scripts/python run_demo.py                                # + API on :8000/docs and workbench on :8501
+.venv/Scripts/streamlit run src/workbench/app.py                # workbench only
+.venv/Scripts/uvicorn src.api.main:app                          # API only
+.venv/Scripts/python run_demo.py --cli-only --report volttwin_report.html
+```
+
+```
+src/config.py            ambient 40 °C, limit 50 °C, BMS cutoff 55 °C, REQ-EL-01 … REQ-EC-01
+src/models/              pydantic specs (every entry has a source) · SQLite repository seeded from data/datasheets/*.json
+src/physics/             electrical · thermal (lumped, PCM, derating) · pybamm_runner · mechanical_bom · replay · targets
+src/validator/           conflict_engine (CF-TE / CF-EM / CF-PS) · traceability · topsis_recommender
+src/pipeline.py          simulate → conflicts → rank → trace → Round-1 comparison (used by API, UI, report, demo)
+src/api/main.py          GET /health, /datasheets · POST /simulate, /compare
+src/workbench/           app.py (Streamlit) · plots.py · views.py · report_generator.py (report + 1S-4P protocol)
+run_demo.py              seed, simulate, verify, print, report, launch
+```
+
+### Model
+
+| Subsystem | Equations |
+|---|---|
+| Electrical | V = S·V_cell · C = P·C_cell · E_usable = S·P·V_nom·C_cell·DoD · R_cell = R0·1.15 (BoL margin) · R_busbar = (S+1)·ρL/(t·w)/P |
+| Thermal | one enthalpy node: dH/dt = N·(I²R − I·T·dU/dT) + I²R_busbar − (T − T_amb)/R_th; T(H) holds at the PCM melt point until the latent heat is used up; hottest cell T_core = T + q_cell·R_core |
+| Duty cycle | ride at 0.5 C from 90 % to 10 % SoC at 40 °C, then fast charge 10 → 80 % at the design C-rate, with and without BMS derating (linear 50 → 55 °C) |
+| PyBaMM | SPMe + lumped thermal on Marquis2019 (NMC) / Prada2013 (LFP) reference cells. Mean heat / I² is scaled by capacity to give an effective R. Effective R is 0.60–0.65× the datasheet R0, and the verdicts are unchanged |
+| Packaging and cost | V = N·V_cell/(π/4)·1.6 + BMS bay + cooling · mass and $ = itemised sums (assumptions A-ME-xx, A-EC-xx) |
+| Ranking | margin score 50·(1 + headroom/span), clipped to 0–100 · TOPSIS on six weighted criteria · UNSAFE / REJECTED / OPTIMAL / ACCEPTABLE |
+
+### Results and findings
+
+| | Baseline | Option A | Option B |
+|---|---|---|---|
+| Peak cell temperature, no derating | 58.4 °C ✗ | 46.3 °C | 45.5 °C |
+| 10–80 % with BMS derating | 56 min ✗ | 44 min | 38 min |
+| Mass / volume | 13.8 kg / 8.5 L | 19.9 kg ✗ / 12.1 L ✗ | 15.6 kg / 9.4 L |
+| BOM | $314 | $346 | $356 |
+| Verdict | UNSAFE | REJECTED | **OPTIMAL** |
+
+- **The verdicts match the Round-1 submission. Three values do not:** the baseline's derated charge time, option
+  A's peak temperature and option A's cost. Each reason is listed in `src/physics/targets.py`, and the tests fail
+  if a listed gap closes or a new one opens.
+- **The recommendation is fragile.** Replaying the real TU Berlin logs through VoltTwin's unfitted datasheet cell
+  under-predicts the measured temperature rise 2–4×. At 1.5× cell heat, option B exceeds 50 °C (UNSAFE). The
+  workbench, report and demo show this sweep next to the recommendation. The 1S-4P bench test (expected peak
+  ΔT 13.9 K at 25 °C lab ambient) is designed to measure the real heat factor.
+- **Both the baseline and option A have protection too small for their peak current.** At 2 C they draw
+  115 A / 106 A, and both the fuse and the BMS are rated at 100 A.
+
+### Known limitations
+
+One lumped thermal node instead of 3D or CFD. Contact resistance is uniform. Cell resistance is held at its 25 °C
+value. Cell, cooling and BOM values are class estimates, and only NMC has measured (proxy) data; the LFP cell is
+not validated. The Round-1 numbers are targets, not measurements. No design is claimed compliant with AIS-156.
+
 ## Resources
 
+- [`TASK.md`](TASK.md): VoltTwin implementation tracker (all phases done; deviations noted per phase)
 - [`ROADMAP.md`](ROADMAP.md): status, full results, pitch storyline, limitations and risks
 - [`GLOSSARY.md`](GLOSSARY.md): project terms (pack, blind spot, thermal hold, charge time, proxy cell…)
 - [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md): timed live-demo walkthrough and backup-clip shot list
