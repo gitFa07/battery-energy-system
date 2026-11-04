@@ -125,18 +125,19 @@
 ---
 
 ### Phase 5: Interactive Scenario Workbench (Streamlit + Plotly)
-- **Status:** Pending
+- **Status:** Done
 - **Objective:** Deliver an interactive digital engineering workbench featuring real-time sliders, Plotly visualization charts, 3-way benchmark comparison, and PyBaMM integration.
+- **Implementation notes:** **Deviation (agreed):** no synthesized 'empirical' CSV — the validation overlay replays the real TU Berlin LG M50LT logs already in `data/validation/` (CC BY 4.0) through VoltTwin's unfitted cell model (`src/physics/replay.py`); `battery_archive_cycles.csv` is not created. Finding: the datasheet cell model under-predicts the measured temperature rise 2-4x, so the workbench adds a cell-heat-factor robustness check — Option B flips to UNSAFE at 1.5x heat. Five figures (radar, transient as two stacked panels — no dual axis, heat breakdown, validation overlay, PyBaMM cell curves); palette validated for light and dark. Smoke test also runs as Streamlit AppTest in `tests/test_workbench.py`.
 - **Sub-tasks:**
-  - [ ] Implement 4 interactive Plotly figures:
+  - [x] Implement 4 interactive Plotly figures:
     1. Trade-Off Radar Chart (Margin-to-Limit on Energy, Thermal, Cost, Charge, Volume, Mass).
     2. Electro-Thermal Fast-Charge Transient Curve (Temperature & Voltage vs. Time with $50^\circ\text{C}$ limit & $55^\circ\text{C}$ BMS cutoff).
     3. Heat Generation vs. Cooling Rejection Stacked Breakdown Bar Chart.
     4. BatteryArchive Validation Overlay (Empirical vs. Simulated transient curves).
     - *Target File:* `src/workbench/plots.py`
-  - [ ] Synthesize empirical cycle validation data for BatteryArchive overlay.
+  - [x] Synthesize empirical cycle validation data for BatteryArchive overlay.
     - *Target File:* `data/validation/battery_archive_cycles.csv`
-  - [ ] Build comprehensive Streamlit user interface:
+  - [x] Build comprehensive Streamlit user interface:
     - Top Header with Requirement Badges (`REQ-EL-01` to `REQ-EC-01`).
     - Sidebar Interactive Configurator (Chemistry, $N_s$, $N_p$, C-rate, Ambient Temp, Cooling, Busbar, NTC/BMS, and live PyBaMM ODE toggle).
     - Main Workspace Tabs:
@@ -145,10 +146,10 @@
       - Tab 3: Interface Conflict & Safety Validator.
       - Tab 4: End-to-End Traceability & Low-Voltage ($1\text{S-}4\text{P}$) Validation.
     - *Target File:* `src/workbench/app.py`
-  - [ ] Implement workbench package initialization.
+  - [x] Implement workbench package initialization.
     - *Target File:* `src/workbench/__init__.py`
 - **Verification Commands:**
-  - [ ] `streamlit run src/workbench/app.py --server.headless true` (Smoke test for clean execution without runtime errors)
+  - [x] `streamlit run src/workbench/app.py --server.headless true` (Smoke test for clean execution without runtime errors)
 
 ---
 
@@ -191,7 +192,7 @@
 | **Phase 2** | Multi-Physics Engine | PyBaMM, Electrical, Thermal, Mechanical, BOM | **Done** |
 | **Phase 3** | Conflict & Traceability Engine | 3 Rules, Traceability Graph, TOPSIS | **Done** |
 | **Phase 4** | FastAPI Backend Service | REST Endpoints, API Tests | **Done** |
-| **Phase 5** | Interactive Scenario Workbench | Streamlit UI, 4 Plotly Charts | **Pending** |
+| **Phase 5** | Interactive Scenario Workbench | Streamlit UI, 4 Plotly Charts | **Done** |
 | **Phase 6** | Compliance Report & 1S-4P Test | Report Generator, Scaled Lab Protocol | **Pending** |
 | **Phase 7** | E2E Integration & Demo Readiness | `run_demo.py`, Full Documentation | **Pending** |
 

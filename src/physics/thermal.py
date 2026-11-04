@@ -85,7 +85,8 @@ def _temperature(h: float, t_ref: float, c: float, t_melt: float | None, e_lat: 
 
 
 def simulate_cycle(design: ModuleDesignInput, cell: CellSpec, cooling: CoolingSpec, pe: PackElectrical,
-                   derate: bool, reversible: bool = True, dt: float = DT_S) -> Transient:
+                   derate: bool, reversible: bool = True, dt: float = DT_S, heat_factor: float = 1.0) -> Transient:
+    """`heat_factor` scales cell heat (robustness check: real-log replays show the datasheet model under-predicts)."""
     t_amb = design.ambient_c
     c = heat_capacity_j_k(pe, cell, cooling)
     e_lat = cooling.pcm_mass_kg * cooling.pcm_latent_j_kg
@@ -112,8 +113,8 @@ def simulate_cycle(design: ModuleDesignInput, cell: CellSpec, cooling: CoolingSp
             f = float(np.clip((BMS_CUTOFF_C - temp) / (BMS_CUTOFF_C - DERATE_START_C), 0, 1)) if derate else 1.0
             i_cell = -design.charge_c_rate * cell.capacity_ah * f
         i_pack = i_cell * pe.n_parallel
-        q_irr = i_cell**2 * pe.r_cell_ohm
-        q_rev = -i_cell * (temp + 273.15) * dudt
+        q_irr = i_cell**2 * pe.r_cell_ohm * heat_factor
+        q_rev = -i_cell * (temp + 273.15) * dudt * heat_factor
         q_cell = q_irr + q_rev
         q_bus = i_pack**2 * pe.r_busbar_ohm
         q_gen = pe.n_cells * q_cell + q_bus

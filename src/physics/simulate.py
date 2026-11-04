@@ -27,7 +27,8 @@ class SimulationRun:
     mechanical: PackMechanical
 
 
-def simulate_design(design: ModuleDesignInput, db: DatasheetDB, use_pybamm: bool = False) -> SimulationRun:
+def simulate_design(design: ModuleDesignInput, db: DatasheetDB, use_pybamm: bool = False,
+                    heat_factor: float = 1.0) -> SimulationRun:
     cell, cooling, busbar = db.get_cell(design.cell_id), db.get_cooling(design.cooling_id), db.get_busbar(design.busbar_id)
     fuse, bms, ntc = db.get_protection(design.fuse_id), db.get_protection(design.bms_id), db.get_protection("ntc_10k")
 
@@ -35,12 +36,14 @@ def simulate_design(design: ModuleDesignInput, db: DatasheetDB, use_pybamm: bool
     pe = pack_electrical(design, cell, busbar, r_cell_ohm=ec.r_eff_ohm)
     # PyBaMM's total heat already contains the reversible part
     reversible = ec.engine == "surrogate"
-    nominal = simulate_cycle(design, cell, cooling, pe, derate=False, reversible=reversible)
-    derated = simulate_cycle(design, cell, cooling, pe, derate=True, reversible=reversible)
+    nominal = simulate_cycle(design, cell, cooling, pe, derate=False, reversible=reversible, heat_factor=heat_factor)
+    derated = simulate_cycle(design, cell, cooling, pe, derate=True, reversible=reversible, heat_factor=heat_factor)
     mech = pack_mechanical(design, cell, cooling, busbar, fuse, bms, ntc)
 
     b = nominal.breakdown_w
     notes = [ec.note] if ec.note else []
+    if heat_factor != 1.0:
+        notes.append(f"cell heat × {heat_factor:g} (robustness check)")
     if not derated.charge_complete:
         notes.append("derated charge did not reach 80 % SoC within the time limit")
     result = ModuleSimulationResult(
