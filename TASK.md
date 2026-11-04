@@ -84,22 +84,23 @@
 ---
 
 ### Phase 3: Interface Conflict Validator, Traceability Chain & TOPSIS Recommender
-- **Status:** Pending
+- **Status:** Done
 - **Objective:** Build deterministic cross-disciplinary conflict detection rules, the requirement-to-validation traceability graph, and TOPSIS multi-criteria decision engine.
+- **Implementation notes:** Rules are ids CF-TE-01..03 (thermal-electrical), CF-EM-01..02 (electro-mechanical), CF-PS-01..06 (protection & sensing: fuse/BMS vs 2 C peak, strip ampacity, NTC count on NMC, NTC inputs, charge rate vs cell limit). UNSAFE = thermal failure or CRITICAL safety alert; REJECTED = other failure/CRITICAL; eligible designs get OPTIMAL (top TOPSIS) or ACCEPTABLE. Assumption registry in `src/physics/assumptions.py`.
 - **Sub-tasks:**
-  - [ ] Implement conflict detection engine with structured alert models (`CRITICAL`, `WARNING`, `PASS`) covering:
+  - [x] Implement conflict detection engine with structured alert models (`CRITICAL`, `WARNING`, `PASS`) covering:
     - Rule 1: Thermal-Electrical Interface Conflict ($\dot{Q}_{\text{total}} > \dot{Q}_{\text{cooling}}$ or $T_{\text{peak}} > 50.0^\circ\text{C}$ causing derating).
     - Rule 2: Electro-Mechanical Packaging Conflict (cell count / chemistry mass $> 18.0\text{ kg}$ or volume $> 12.0\text{ L}$).
     - Rule 3: Protection & Sensing Interface Conflict (peak 2C discharge $>$ fuse rating, NTC count $< 6$ on high-density NMC).
     - *Target File:* `src/validator/conflict_engine.py`
-  - [ ] Implement traceability builder linking: Requirement ID $\rightarrow$ Datasheet Parameter $\rightarrow$ Physics Model $\rightarrow$ Simulated Metric $\rightarrow$ Validation Reference.
+  - [x] Implement traceability builder linking: Requirement ID $\rightarrow$ Datasheet Parameter $\rightarrow$ Physics Model $\rightarrow$ Simulated Metric $\rightarrow$ Validation Reference.
     - *Target File:* `src/validator/traceability.py`
-  - [ ] Implement margin-to-limit normalization (0–100 scale) for Radar axes and TOPSIS multi-criteria decision ranker producing automated verdicts (`OPTIMAL`, `REJECTED`, `UNSAFE`).
+  - [x] Implement margin-to-limit normalization (0–100 scale) for Radar axes and TOPSIS multi-criteria decision ranker producing automated verdicts (`OPTIMAL`, `REJECTED`, `UNSAFE`).
     - *Target File:* `src/validator/topsis_recommender.py`
-  - [ ] Implement validator package initialization.
+  - [x] Implement validator package initialization.
     - *Target File:* `src/validator/__init__.py`
 - **Verification Commands:**
-  - [ ] `pytest tests/test_conflict_validator.py -v` (Verify conflict alert triggers, radar margin scaling, TOPSIS ranking, and traceability link integrity)
+  - [x] `pytest tests/test_conflict_validator.py -v` (Verify conflict alert triggers, radar margin scaling, TOPSIS ranking, and traceability link integrity)
 
 ---
 
@@ -187,7 +188,7 @@
 |---|---|---|---|
 | **Phase 1** | Scaffolding, Schemas & Datasheets | Schemas, SQLite loader, LiionDB datasheets | **Done** |
 | **Phase 2** | Multi-Physics Engine | PyBaMM, Electrical, Thermal, Mechanical, BOM | **Done** |
-| **Phase 3** | Conflict & Traceability Engine | 3 Rules, Traceability Graph, TOPSIS | **Pending** |
+| **Phase 3** | Conflict & Traceability Engine | 3 Rules, Traceability Graph, TOPSIS | **Done** |
 | **Phase 4** | FastAPI Backend Service | REST Endpoints, API Tests | **Pending** |
 | **Phase 5** | Interactive Scenario Workbench | Streamlit UI, 4 Plotly Charts | **Pending** |
 | **Phase 6** | Compliance Report & 1S-4P Test | Report Generator, Scaled Lab Protocol | **Pending** |

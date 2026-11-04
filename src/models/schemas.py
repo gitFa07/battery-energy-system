@@ -13,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 Evidence = Literal["datasheet", "assumption", "calculated", "estimated", "simulated", "measured"]
 Status = Literal["PASS", "FAIL"]
-Verdict = Literal["OPTIMAL", "REJECTED", "UNSAFE"]
+Verdict = Literal["OPTIMAL", "ACCEPTABLE", "REJECTED", "UNSAFE"]  # ACCEPTABLE = eligible but not the top pick
 
 
 class _Spec(BaseModel):
@@ -194,6 +194,7 @@ class TraceabilityRecord(BaseModel):
     requirement_id: str
     datasheet_parameters: list[str] = Field(description="'<spec id>.<field>' inputs the metric depends on")
     physics_model: str
+    assumptions: list[str] = Field(default_factory=list, description="ids in src.physics.assumptions.ASSUMPTIONS")
     simulated_metric: str
     value: float
     limit: str
