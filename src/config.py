@@ -22,7 +22,7 @@ REQUIREMENTS: list[HardRequirement] = [
     HardRequirement(id="REQ-TH-01", text=f"Peak cell temperature at {AMBIENT_REF_C:g} °C ambient",
                     metric="t_peak_c", max=T_PEAK_LIMIT_C, unit="°C",
                     cutoff=f"BMS thermal cutoff at {BMS_CUTOFF_C:g} °C"),
-    HardRequirement(id="REQ-CH-01", text="Fast-charge turnaround 10-80 % SoC", metric="charge_time_10_80_min",
+    HardRequirement(id="REQ-CH-01", text="Fast-charge turnaround 10-80 % SoC", metric="charge_time_derated_min",
                     max=45.0, unit="min", cutoff="Exceeds turnaround window"),
     HardRequirement(id="REQ-ME-01", text="Module total mass", metric="mass_kg", max=18.0, unit="kg",
                     cutoff="Exceeds e-scooter chassis structural envelope"),

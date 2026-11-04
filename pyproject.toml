@@ -14,7 +14,7 @@ dev = ["pytest>=8,<9.2"]  # 9.2.0 crashes with INTERNALERROR in this env
 volttwin = ["fastapi>=0.110", "uvicorn>=0.29", "pybamm>=24.1", "httpx>=0.27"]
 
 [tool.setuptools]
-packages = ["packforge", "src", "src.models"]
+packages = ["packforge", "src", "src.models", "src.physics", "src.validator", "src.api", "src.workbench"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

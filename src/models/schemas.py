@@ -162,17 +162,32 @@ class ModuleSimulationResult(BaseModel):
     v_nom_v: float
     v_min_v: float
     v_max_v: float
+    n_cells: int
+    capacity_ah: float
+    nominal_energy_kwh: float
     usable_energy_kwh: float
-    t_peak_c: float
-    charge_time_10_80_min: float
-    charge_time_derated_min: float
-    heat_gen_w: float
-    heat_reject_w: float
+    r_pack_ohm: float
+    r_eff_ratio_vs_datasheet: float = Field(description="cell resistance used / datasheet R0 (1 for surrogate)")
+    peak_discharge_a: float
+    busbar_strip_current_a: float
+    t_charge_start_c: float = Field(description="hottest-cell temperature at plug-in (after the ride)")
+    t_peak_c: float = Field(description="hottest-cell peak over ride + charge at the design rate, no derating")
+    t_peak_derated_c: float = Field(description="hottest-cell peak with BMS derating active")
+    charge_time_10_80_min: float = Field(description="10-80 % at the design rate, no derating")
+    charge_time_derated_min: float = Field(description="10-80 % with BMS derating = real turnaround")
+    charge_complete: bool = True
+    heat_gen_w: float = Field(description="mean heat generated during the charge")
+    heat_cells_w: float
+    heat_reversible_w: float
+    heat_busbar_w: float
+    heat_reject_w: float = Field(description="mean heat rejected to ambient during the charge")
+    heat_pcm_w: float = Field(description="mean heat absorbed as PCM latent heat during the charge")
     mass_kg: float
     volume_l: float
     bom_cost_usd: float
     requirement_status: dict[str, Status] = Field(default_factory=dict)
     verdict: Verdict | None = None
+    notes: list[str] = Field(default_factory=list)
 
 
 class TraceabilityRecord(BaseModel):
