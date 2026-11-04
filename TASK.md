@@ -154,19 +154,20 @@
 ---
 
 ### Phase 6: Automated Compliance Report Exporter & Low-Voltage (1S-4P) Validation Module
-- **Status:** Pending
+- **Status:** Done
 - **Objective:** Add one-click export of an engineering compliance report and a scaled $1\text{S-}4\text{P}$ low-voltage bench test protocol.
+- **Implementation notes:** Report adds the robustness sweep, Round-1 gaps and the real-log validation table to the TASK.md sections. The 1S-4P bench protocol (3.65 V, 19.2 Ah) runs the pack's per-cell currents in still lab air at 25 °C; its expected ΔT comes from the same thermal model, so measured / expected ΔT gives the cell-heat factor. Safety precautions per CLAUDE.md (1S only, protected cells/cutoffs, inline fuse, fireproof bag, never unattended). Report and protocol are also in the workbench's Traceability tab (download buttons).
 - **Sub-tasks:**
-  - [ ] Implement report generator exporting Markdown / HTML Battery System Design & Safety Traceability Report:
+  - [x] Implement report generator exporting Markdown / HTML Battery System Design & Safety Traceability Report:
     - Selected architecture and BOM breakdown.
     - Requirements compliance status matrix.
     - Active interface conflicts and documented model assumptions ($15\%$ ageing margin, uniform contact resistance, 1D lumped vs. 3D CFD limitations).
     - Scaled $1\text{S-}4\text{P}$ Safe Low-Voltage ($3.65\text{ V}, 19.2\text{ Ah}$) Bench Test Protocol (load resistor/current parameters, 8-point NTC placement, expected $\Delta T$).
     - *Target File:* `src/workbench/report_generator.py`
-  - [ ] Implement unit tests for report generation and $1\text{S-}4\text{P}$ test calculation.
+  - [x] Implement unit tests for report generation and $1\text{S-}4\text{P}$ test calculation.
     - *Target File:* `tests/test_report_generator.py`
 - **Verification Commands:**
-  - [ ] `pytest tests/test_report_generator.py -v` (Verify complete report formatting and traceability ID inclusion)
+  - [x] `pytest tests/test_report_generator.py -v` (Verify complete report formatting and traceability ID inclusion)
 
 ---
 
@@ -193,6 +194,6 @@
 | **Phase 3** | Conflict & Traceability Engine | 3 Rules, Traceability Graph, TOPSIS | **Done** |
 | **Phase 4** | FastAPI Backend Service | REST Endpoints, API Tests | **Done** |
 | **Phase 5** | Interactive Scenario Workbench | Streamlit UI, 4 Plotly Charts | **Done** |
-| **Phase 6** | Compliance Report & 1S-4P Test | Report Generator, Scaled Lab Protocol | **Pending** |
+| **Phase 6** | Compliance Report & 1S-4P Test | Report Generator, Scaled Lab Protocol | **Done** |
 | **Phase 7** | E2E Integration & Demo Readiness | `run_demo.py`, Full Documentation | **Pending** |
 

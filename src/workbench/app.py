@@ -13,7 +13,7 @@ from src.models.schemas import ModuleDesignInput
 from src.physics.pybamm_runner import run_cell
 from src.physics.replay import real_logs, replay_log
 from src.pipeline import ROBUSTNESS_FACTORS, StudyEvaluation, evaluate, robustness
-from src.workbench import plots, views
+from src.workbench import plots, report_generator, views
 
 st.set_page_config(page_title="VoltTwin Studio", page_icon=":material/battery_charging_full:", layout="wide")
 SEVERITY_ICON = {"CRITICAL": ":material/error:", "WARNING": ":material/warning:", "PASS": ":material/check:"}
@@ -46,6 +46,13 @@ def replay(log_name: str, cell_json: str):
     from src.models.schemas import CellSpec
     path = next(p for p in real_logs() if p.name == log_name)
     return replay_log(path, CellSpec.model_validate_json(cell_json))
+
+
+@st.cache_data(show_spinner="Building report…")
+def make_report(designs_json: tuple[str, ...], use_pybamm: bool, heat_factor: float, selected: str):
+    designs = [ModuleDesignInput.model_validate_json(j) for j in designs_json]
+    return report_generator.build_report(evaluate(designs, get_db(), use_pybamm, heat_factor), get_db(),
+                                         robustness(designs, get_db()), selected)
 
 
 db = get_db()
@@ -210,3 +217,21 @@ with tab_trace:
     st.plotly_chart(plots.validation_overlay(replay(log, nmc.model_dump_json())), width="stretch")
     st.dataframe(views.replay_table([replay(n, nmc.model_dump_json()) for n in logs]), hide_index=True,
                  width="stretch")
+
+    st.subheader("Scaled 1S-4P low-voltage bench test")
+    bench = report_generator.bench_protocol(pick_t.run.design, db)
+    st.caption(report_generator.BENCH_PURPOSE)
+    b1, b2 = st.columns([1, 1])
+    b1.dataframe(report_generator.bench_table(bench), hide_index=True, width="stretch")
+    b2.markdown("**NTC placement (8 points)**\n" + "\n".join(f"- {p}" for p in bench.ntc_positions))
+    b2.markdown("**Safety precautions**\n" + "\n".join(f"- {s}" for s in bench.safety))
+    with st.expander("Procedure"):
+        st.markdown("\n".join(f"{i + 1}. {s}" for i, s in enumerate(bench.steps)))
+
+    st.subheader("Design & safety traceability report")
+    rep = make_report(tuple(d.model_dump_json() for d in designs), use_pybamm, heat_factor, pick_t.id)
+    d1, d2 = st.columns(2)
+    d1.download_button("Download HTML report", rep.html, file_name=f"volttwin_{pick_t.id}_report.html",
+                       mime="text/html", icon=":material/download:", width="stretch")
+    d2.download_button("Download Markdown report", rep.markdown, file_name=f"volttwin_{pick_t.id}_report.md",
+                       mime="text/markdown", icon=":material/download:", width="stretch")
