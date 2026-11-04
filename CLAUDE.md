@@ -47,10 +47,11 @@ packforge/
   engine.py    run_scenarios (honours chains), run_design, monte_carlo, rank, recommend, traceability
   fit.py       fit cell params (+ r_temp_k, OCV) to measured logs by replaying them through sim.py; hold-out eval
   figures.py   plotly figures shared by UI and report
-  ui.py        HTML for the UI: verdict headline, requirement grid (designs × checks), KPI table
+  ui.py        HTML for the UI: verdict, robustness line, KPI cards, requirement grid (designs × checks), KPI table
   report.py    self-contained HTML design report
   __main__.py  CLI
-app.py         Streamlit UI (Compare · Time series · Heat map · Conflicts · Traceability · Monte Carlo · Validation)
+app.py         Streamlit UI: verdict + KPI cards + grid, then tabs Compare · Behaviour · Issues and fixes · Evidence ·
+               Validation and spread
 .streamlit/    theme (deck colours, light + dark) and bundled Barlow fonts from static/fonts/ (OFL)
 data/cells/    cell JSON (id = filename); `<id>_fitted.json` from `fit --save`; `<id>_uncalibrated.json` = pre-calibration
 data/validation/  logs (CSV: time_s, current_a [+ = discharge], voltage_v, temp_c [, temp_core_c, soc, ambient_c]),
@@ -129,7 +130,9 @@ chained charge starts from drive end state · hot plug-in fails baseline REQ-03 
 observer stays ≤ 45 °C at ±30 % model error · sim vs hand-calc bound · conflict detection (IF-01, OT trip → IF-14) ·
 ranking puts eligible designs first · MC batch == single run · fit recovers synthetic params (from the
 `_uncalibrated` cell) · calibrated cell predicts two 45 °C hold-out logs · charge time ≥ hold + 10–80 % ·
-recommend() roles · replay starts hot · extra heat only makes designs hotter · report content · UI grid/verdict.
+recommend() roles · replay starts hot · extra heat only makes designs hotter · report content · UI grid/verdict ·
+KPI cards, pills, robustness line · no banned words in UI copy · transparent figure backgrounds · app.py renders with
+five tabs (AppTest).
 Add a test for every new rule or model.
 
 ## Style

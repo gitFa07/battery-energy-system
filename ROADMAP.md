@@ -85,7 +85,7 @@ margin): higher measured resistance → more current for the same power.
   1. baseline after a ride → 48 min hold, then REQ-03 fails; heat map shows the interior hotspot vs edge NTCs
   2. Option C (observer) → passes, but slower — the honest trade-off
   3. compare A and B; three-part recommendation
-  4. Validation tab: replay a 45 °C hold-out charge through the calibrated model
+  4. Validation and spread tab: replay a 45 °C hold-out charge through the calibrated model
   5. heat slider to 2× → recommendation flips to A (top risk, live)
   6. download the offline report
 - 🔜 Screenshots and the CLI output as offline backup for the demo

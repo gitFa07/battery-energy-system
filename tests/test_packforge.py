@@ -171,6 +171,93 @@ def test_ui_grid_and_verdict(study_and_results):
     assert "Recommended: Option B" in ui.verdict(recs, rs)
     assert "No design meets" in ui.verdict([], rs)
     assert ui.kpi_table(rs, study).count("<tr>") == len(KPIS) + 1
+    assert "Recommendation" in ui.verdict(recs, rs) and "Issues and fixes" in ui.verdict([], rs)
+
+
+def test_ui_kpi_cards(study_and_results):
+    from packforge import ui
+
+    study, results = study_and_results
+    base, best = results["baseline"], results["option_b"]
+    cards = ui.kpi_cards(base, study)
+    assert cards.count('class="card"') == len(ui.CARD_KPIS)
+    assert cards.count('class="pill fail"') == 1 and "REQ-03" in cards  # baseline: hot plug-in breaks REQ-03
+    assert 'class="c ' not in cards  # grid marks stay countable in test_ui_grid_and_verdict
+    assert 'class="pill fail"' not in ui.kpi_cards(best, study)
+    assert "ineligible" in ui.kpi_cards(base, study, eligible=False)
+    assert "ineligible" not in cards
+    # a KPI without a requirement gets no pill and no limit
+    bare = study.model_copy(update={"requirements": [q for q in study.requirements if q.metric != "cost_inr"]})
+    assert ui.kpi_cards(best, bare).count('class="pill ') == len(ui.CARD_KPIS) - 1
+
+
+def test_ui_pill_always_has_words():
+    from packforge import ui
+
+    for sev, word in [("pass", "pass"), ("warn", "warning"), ("fail", "fail")]:
+        assert ui.pill(sev) == f'<span class="pill {sev}">{word}</span>'
+    assert ">ineligible<" in ui.pill("fail", "ineligible")
+
+
+def test_ui_robustness_note(study_and_results):
+    from packforge import ui
+    from packforge.engine import Recommendation
+
+    study, results = study_and_results
+    rs = list(results.values())
+    rec = lambda d: [Recommendation("recommended", d, "", "")]  # noqa: E731
+    assert ui.robustness_note([], rs, 2.0) == ""
+    assert ui.robustness_note(rec("option_b"), rs, 2.0, current=2.0) == ""  # slider already there
+    ok = ui.robustness_note(rec("option_b"), rs, 2.0)
+    assert "still passes" in ok and "pf-robust fail" not in ok
+    bad = ui.robustness_note(rec("baseline"), rs, 2.0)  # baseline fails REQ-03 in these results
+    assert "fails" in bad and "REQ-03" in bad and "pf-robust fail" in bad
+    assert all("AIS" not in x for x in (ok, bad))
+
+
+BANNED = ["delve", "foster", "leverage", "utilize", "facilitate", "empower", "streamline", "robust", "cutting-edge",
+          "seamless", "game changer", "tapestry", "realm", "beacon", "multifaceted", "meticulous", "paramount",
+          "transformative", "elevate", "embark", "supercharge", "harness", "ever-evolving", "it's worth noting"]
+
+
+def test_ui_copy_has_no_banned_words(study_and_results):
+    from packforge import ui
+    from packforge.engine import recommend
+
+    study, results = study_and_results
+    rs = list(results.values())
+    recs = recommend(rs, study)
+    html = " ".join([ui.masthead(study, True, 1.5), ui.verdict(recs, rs), ui.verdict([], rs), ui.alternatives(recs),
+                     ui.kpi_cards(rs[0], study, eligible=False), ui.robustness_note(recs, rs, 2.0),
+                     ui.requirement_grid(rs, rank(rs, study), study, None)])
+    text = (re.sub(r"<[^>]+>", " ", html) + (ROOT / "app.py").read_text(encoding="utf-8")).lower()  # visible text
+    found = [w for w in BANNED if re.search(rf"\b{re.escape(w)}\b", text)]
+    assert not found, found
+    assert "ais-156" not in text and "ais 156" not in text
+
+
+def test_figures_keep_transparent_background(study_and_results):
+    from packforge import figures
+
+    study, results = study_and_results
+    rs = list(results.values())
+    figs = [figures.radar(rs, study), figures.timeseries(rs, "charge", "Max cell temp °C"),
+            figures.heatmap(rs[0], figures.heat_range(rs)), figures.histogram(np.linspace(1, 2, 30), "charge_time_min",
+                                                                             figures.design_color(0)),
+            figures.validation(np.arange(5.0), np.ones(5), np.ones(5), "V")]
+    for f in figs:
+        assert f.layout.paper_bgcolor == "rgba(0,0,0,0)" and f.layout.plot_bgcolor == "rgba(0,0,0,0)"
+        assert f.layout.title.x == 0  # left-aligned titles
+    assert [a.text for a in figs[3].layout.annotations] == ["P5", "P95"]
+
+
+def test_app_renders():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file(str(ROOT / "app.py"), default_timeout=300).run()
+    assert not at.exception
+    assert [t.label for t in at.tabs] == ["Compare", "Behaviour", "Issues and fixes", "Evidence",
+                                          "Validation and spread"]
 
 
 def test_charge_time_includes_thermal_hold(study_and_results):

@@ -31,12 +31,12 @@ def cached_run(design_json: str, study_json: str) -> DesignResult:
     return run_design(Design.model_validate_json(design_json), Study.model_validate_json(study_json))
 
 
-@st.cache_data(show_spinner="Sampling cell variation…")
+@st.cache_data(show_spinner="Sampling cell-to-cell spread…")
 def cached_mc(design_json: str, study_json: str, n: int) -> dict[str, np.ndarray]:
     return monte_carlo(Design.model_validate_json(design_json), Study.model_validate_json(study_json), n=n)
 
 
-@st.cache_data(show_spinner="Fitting cell model to the log (~30 s)…")
+@st.cache_data(show_spinner="Fitting the cell model to the log (about 30 s)…")
 def cached_fit(log_name: str, cell_id: str) -> FitResult:
     return fit(Log.read(VALIDATION_DIR / log_name), load_cell(cell_id))
 
@@ -47,53 +47,56 @@ def cached_eval(cell_id: str, h_eff: float, c_th: float | None, log_name: str) -
 
 
 # ---------------------------------------------------------------- sidebar: what to compare, conditions, what-if
+st.sidebar.caption("Compare")
 studies = sorted(p for p in (ROOT / "studies").iterdir() if (p / "study.json").exists())
 study_dir = st.sidebar.selectbox("Study", studies, format_func=lambda p: p.name)
 study = Study.model_validate_json((study_dir / "study.json").read_text(encoding="utf-8"))
 raw = {p.stem: load_design_dict(p) for p in sorted(study_dir.glob("*.json")) if p.name != "study.json"}
 chosen = st.sidebar.multiselect("Designs", list(raw), default=list(raw))
 
-st.sidebar.divider()
+st.sidebar.caption("Conditions")
 study = study.model_copy(update={"ambient_c": st.sidebar.slider("Ambient °C", 0, 50, int(study.ambient_c))})
 charge_sc = study.scenarios["charge"]
-hot = st.sidebar.toggle("Charge right after the ride (pack still hot)", value=charge_sc.after is not None)
+hot = st.sidebar.toggle("Charge straight after the ride", value=charge_sc.after is not None,
+                        help="The charge starts from the pack's state at the end of the ride, so it starts hot.")
 study = study.model_copy(update={"scenarios": {**study.scenarios, "charge": charge_sc.model_copy(
     update={"after": (charge_sc.after or "drive") if hot else None})}})
 heat = st.sidebar.slider("Unmodelled heat ×", 1.0, 2.5, 1.0, 0.1,
-                         help="Model uncertainty: the hold-out check under-predicts the measured temperature rise "
-                              "by up to ~2× (Validation tab). Multiplies heat in every cell; the BMS observer is not "
-                              "told.")
+                         help="Multiplies the heat every cell makes. On the 45 °C hold-out logs the model "
+                              "under-predicts the temperature rise by up to about 2× (see Validation). The BMS "
+                              "observer is not told about the extra heat.")
 
-st.sidebar.divider()
-with st.sidebar.expander("What-if variant", icon=":material/tune:"):
-    base_key = st.selectbox("Start from", list(raw))
-    b = raw[base_key]
-    enabled = st.checkbox("Add what-if to comparison", value=False)
-    placements = ["edge", "spread", "center"]
-    overrides = {
-        "id": "what_if", "name": f"What-if — from {base_key}",
-        "topology": {"parallel": st.slider("Parallel cells", 4, 16, b["topology"]["parallel"])},
-        "control": {
-            "charge_c_rate": st.slider("Charge C-rate", 0.2, 2.0, float(b["control"]["charge_c_rate"]), 0.05),
-            "derate_start_c": st.slider("Derate start °C", 30.0, 60.0, float(b["control"]["derate_start_c"]), 0.5),
-            "derate_end_c": st.slider("Derate end °C", 30.0, 60.0, float(b["control"]["derate_end_c"]), 0.5),
-            "derate_on": st.radio("Derate on", ["sensed", "observer"], horizontal=True,
-                                  index=["sensed", "observer"].index(b["control"].get("derate_on", "sensed"))),
-        },
-        "cooling": {"h_eff_w_m2k": st.slider("Cooling h_eff W/m²K", 0.5, 40.0, float(b["cooling"]["h_eff_w_m2k"]), 0.5)},
-        "sensing": {
-            "n_temp_sensors": st.slider("Temp sensors", 1, 12, b["sensing"]["n_temp_sensors"]),
-            "placement": st.selectbox("Sensor placement", placements,
-                                      index=placements.index(b["sensing"]["placement"])
-                                      if isinstance(b["sensing"]["placement"], str) else 1),
-        },
-    }
+with st.sidebar.expander("What-if design", icon=":material/tune:"):
+    enabled = st.checkbox("Add a what-if design", value=False)
+    if enabled:
+        base_key = st.selectbox("Start from", list(raw))
+        b = raw[base_key]
+        placements = ["edge", "spread", "center"]
+        overrides = {
+            "id": "what_if", "name": f"What-if — from {base_key}",
+            "topology": {"parallel": st.slider("Parallel cells", 4, 16, b["topology"]["parallel"])},
+            "control": {
+                "charge_c_rate": st.slider("Charge C-rate", 0.2, 2.0, float(b["control"]["charge_c_rate"]), 0.05),
+                "derate_start_c": st.slider("Derate start °C", 30.0, 60.0, float(b["control"]["derate_start_c"]), 0.5),
+                "derate_end_c": st.slider("Derate end °C", 30.0, 60.0, float(b["control"]["derate_end_c"]), 0.5),
+                "derate_on": st.radio("Derate on", ["sensed", "observer"], horizontal=True,
+                                      index=["sensed", "observer"].index(b["control"].get("derate_on", "sensed"))),
+            },
+            "cooling": {"h_eff_w_m2k": st.slider("Cooling h_eff W/m²K", 0.5, 40.0,
+                                                 float(b["cooling"]["h_eff_w_m2k"]), 0.5)},
+            "sensing": {
+                "n_temp_sensors": st.slider("Temp sensors", 1, 12, b["sensing"]["n_temp_sensors"]),
+                "placement": st.selectbox("Sensor placement", placements,
+                                          index=placements.index(b["sensing"]["placement"])
+                                          if isinstance(b["sensing"]["placement"], str) else 1),
+            },
+        }
 
 designs = [build_design(raw[k]) for k in chosen]
 if enabled:
     designs.append(build_design(deep_merge(b, overrides)))
 if not designs:
-    st.info("Pick at least one design under **Designs** in the sidebar to compare.")
+    st.info("Select at least one design in the sidebar.")
     st.stop()
 designs = [with_heat_factor(d, heat) for d in designs] if heat != 1 else designs
 
@@ -101,34 +104,52 @@ study_json = study.model_dump_json()
 results = [cached_run(d.model_dump_json(), study_json) for d in designs]
 names = [r.design.name for r in results]
 
-# ---------------------------------------------------------------- verdict: recommendation + requirement grid
+# ---------------------------------------------------------------- answer first: verdict, headline numbers, grid
 ranking = rank(results, study)
 recs = recommend(results, study)
-stress = [cached_run(with_heat_factor(d, max(heat, 2.0)).model_dump_json(), study_json) for d in designs]
+stress_factor = max(heat, 2.0)
+stress = [cached_run(with_heat_factor(d, stress_factor).model_dump_json(), study_json) for d in designs]
+by_id = {r.design.id: r for r in results}
+shown = by_id[recs[0].design_id if recs else ranking[0].design_id]
 
 top, dl = st.columns([5, 1], vertical_alignment="top")
 top.html(ui.masthead(study, hot, heat))
-dl.download_button("Download report (HTML)", build_report(results, study, stress), file_name="packforge_report.html",
-                   mime="text/html", icon=":material/download:", width="stretch")
-st.html(ui.verdict(recs, results))
-st.html(ui.alternatives(recs) + ui.requirement_grid(results, ranking, study, recs[0].design_id if recs else None))
+dl.download_button("Download report", build_report(results, study, stress), file_name="packforge_report.html",
+                   mime="text/html", icon=":material/download:", width="stretch",
+                   help="One self-contained HTML file with the comparison, charts and traceability.")
+st.html(ui.verdict(recs, results) + ui.robustness_note(recs, stress, stress_factor, heat)
+        + ui.kpi_cards(shown, study, eligible=bool(recs)) + ui.alternatives(recs))
+with st.expander("Check-by-check results", expanded=True, icon=":material/grid_view:"):
+    st.html(ui.requirement_grid(results, ranking, study, recs[0].design_id if recs else None))
 
-tabs = st.tabs(["Compare", "Time series", "Heat map", "Conflicts", "Traceability", "Monte Carlo", "Validation"],
-               key="view")
+tabs = st.tabs(["Compare", "Behaviour", "Issues and fixes", "Evidence", "Validation and spread"], key="view")
 
 # ---------------------------------------------------------------- compare
 with tabs[0]:
     st.html(ui.kpi_table(results, study))
     c1, c2 = st.columns([3, 2], vertical_alignment="center")
     c1.plotly_chart(figures.radar(results, study), width="stretch")
-    c2.markdown("**How the score works.** Each KPI in `score_weights` (study.json) is min-max normalised across the "
-                "designs on screen and weighted; the radar shows the same normalised values. A failed *must* "
-                "requirement or critical interface rule disqualifies a design whatever its score.")
-    c2.markdown("**Thermal-limit bound** is an independent hand calculation (cold start) that cross-checks the "
-                "simulated charge time.")
+    with c2.expander("How the score works", icon=":material/help:"):
+        st.markdown("Each KPI in `score_weights` (study.json) is scaled from 0 to 1 across the designs on screen, "
+                    "then weighted. The radar shows the same scaled values. A failed *must* requirement or critical "
+                    "interface rule disqualifies a design whatever its score.")
+    with c2.expander("What the thermal-limit bound is", icon=":material/calculate:"):
+        st.markdown("A hand calculation, independent of the simulator: the fastest charge an interior cell could "
+                    "take from a cold start without passing the charge limit. It cross-checks the simulated charge "
+                    "time.")
 
-# ---------------------------------------------------------------- time series
+# ---------------------------------------------------------------- behaviour: heat map, then time series
 with tabs[1]:
+    st.subheader("Heat map")
+    st.caption("Cell temperatures when the hottest cell peaked. All designs share one colour scale. Rings mark the "
+               "BMS temperature sensors.")
+    zr = figures.heat_range(results)
+    per_row = min(len(results), 2)
+    for i in range(0, len(results), per_row):
+        for col, r in zip(st.columns(per_row), results[i:i + per_row]):
+            col.plotly_chart(figures.heatmap(r, zr), width="stretch")
+
+    st.subheader("Time series")
     c1, c2 = st.columns([1, 3])
     which = c1.radio("Scenario", ["charge", "drive"], horizontal=True)
     picked = c2.multiselect("Signals", list(figures.SIGNALS), default=["Max cell temp °C", "BMS hotspot view °C"])
@@ -137,18 +158,8 @@ with tabs[1]:
     for r in results:
         st.caption(f"**{r.design.name}**, {which}: " + "; ".join(getattr(r, which).events[0]))
 
-# ---------------------------------------------------------------- heat map
+# ---------------------------------------------------------------- issues and fixes (requirements + interface rules)
 with tabs[2]:
-    st.caption("Cell temperatures at the moment the hottest cell peaked, on one colour scale for every design. "
-               "Rings mark the BMS temperature sensors.")
-    zr = figures.heat_range(results)
-    per_row = min(len(results), 2)
-    for i in range(0, len(results), per_row):
-        for col, r in zip(st.columns(per_row), results[i:i + per_row]):
-            col.plotly_chart(figures.heatmap(r, zr), width="stretch")
-
-# ---------------------------------------------------------------- conflicts
-with tabs[3]:
     for r in results:
         issues = r.fails + r.warns
         st.subheader(r.design.name)
@@ -160,10 +171,10 @@ with tabs[3]:
             with st.expander(f"{f.id} {f.title}", expanded=f.severity == "fail", icon=SEVERITY_ICON[f.severity]):
                 st.markdown(f"**Subsystems:** {', '.join(f.subsystems)}  \n**Why:** {f.detail}")
                 if f.fixes:
-                    st.markdown("**Candidate fixes:**\n" + "\n".join(f"- {x}" for x in f.fixes))
+                    st.markdown("**Possible fixes:**\n" + "\n".join(f"- {x}" for x in f.fixes))
 
-# ---------------------------------------------------------------- traceability
-with tabs[4]:
+# ---------------------------------------------------------------- evidence: traceability
+with tabs[3]:
     st.caption("Evidence ladder: datasheet → assumption → calculated → estimated → simulated → measured")
     r = results[st.selectbox("Design", range(len(results)), format_func=lambda i: names[i], key="trace_design")]
     st.dataframe(pd.DataFrame(traceability(r, study)), hide_index=True, width="stretch")
@@ -173,25 +184,15 @@ with tabs[4]:
     st.download_button("Download design (JSON)", json.dumps(r.design.model_dump(), indent=2, ensure_ascii=False),
                        file_name=f"{r.design.id}.json", icon=":material/download:")
 
-# ---------------------------------------------------------------- monte carlo
-with tabs[5]:
-    st.caption("Samples cell-to-cell capacity and resistance spread, then simulates every pack.")
-    c1, c2 = st.columns(2)
-    i = c1.selectbox("Design", range(len(results)), format_func=lambda i: names[i], key="mc_design")
-    n = c2.slider("Packs to sample", 10, 200, 50, 10)
-    if st.button("Run Monte Carlo", type="primary"):
-        mc = cached_mc(designs[i].model_dump_json(), study_json, n)
-        for c, k in zip(st.columns(3), ["usable_energy_wh", "charge_time_min", "t_max_charge_c"]):
-            c.plotly_chart(figures.histogram(mc[k], k, figures.design_color(i)), width="stretch")
-
-# ---------------------------------------------------------------- validation
-with tabs[6]:
+# ---------------------------------------------------------------- validation, then cell-to-cell spread
+with tabs[4]:
     for cell_id in dict.fromkeys(r.design.cell.id for r in results):
         cal = load_calibration(cell_id)
         cell_name = next(r.design.cell.name for r in results if r.design.cell.id == cell_id)
         if cal is None:
-            st.warning(f"**{cell_name}** is not validated against measured data: class values only. Results for "
-                       "designs using it are model estimates.", icon=":material/warning:")
+            st.warning(f"**{cell_name}** is not validated. Its parameters are typical values for its cell class, "
+                       "not measurements, so results for designs that use it are estimates.",
+                       icon=":material/warning:")
             continue
         st.subheader(f"Calibration: {cell_name}")
         st.caption(f"Proxy cell: {cal['proxy']}. Fitted on {len(cal['fit_logs'])} logs at 25–35 °C; hold-out at "
@@ -245,8 +246,8 @@ with tabs[6]:
         cell_id = c2.selectbox("Start from cell", cells, index=cells.index("nmc21700_5ah_uncalibrated")
                                if "nmc21700_5ah_uncalibrated" in cells else 0)
         if log_name.startswith("SYNTHETIC"):
-            st.warning("This log is SYNTHETIC (generated by our own model + noise). It checks that the fitting "
-                       "method recovers known parameters. It is **not** validation evidence.",
+            st.warning("This log is SYNTHETIC: our own model plus noise. It checks that the fit recovers known "
+                       "parameters. It is **not** validation evidence.",
                        icon=":material/science:")
         if st.button("Fit model to log", type="primary"):
             res = cached_fit(log_name, cell_id)
@@ -262,3 +263,14 @@ with tabs[6]:
                             width="stretch")
             st.caption("Save fitted parameters as a new cell: "
                        f"`python -m packforge.fit data/validation/{log_name} --cell {cell_id} --save`")
+
+    st.subheader("Cell-to-cell spread (Monte Carlo)")
+    st.caption("Draws packs with random cell-to-cell spread in capacity and resistance and simulates each one. "
+               "Dotted lines mark P5 and P95.")
+    c1, c2 = st.columns(2)
+    i = c1.selectbox("Design", range(len(results)), format_func=lambda i: names[i], key="mc_design")
+    n = c2.slider("Packs to sample", 10, 200, 50, 10)
+    if st.button("Run Monte Carlo", type="primary"):
+        mc = cached_mc(designs[i].model_dump_json(), study_json, n)
+        for c, k in zip(st.columns(3), ["usable_energy_wh", "charge_time_min", "t_max_charge_c"]):
+            c.plotly_chart(figures.histogram(mc[k], k, figures.design_color(i)), width="stretch")

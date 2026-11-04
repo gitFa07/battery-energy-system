@@ -71,7 +71,7 @@ retrofit for 2-NTC packs already built. C is safe but slower after a hot ride.
 ## Walkthrough
 
 The e-scooter study, step by step in the workbench UI. Start it with `.venv/Scripts/streamlit run app.py`, keep
-only **baseline** under **Designs**, and leave ambient at 40 °C with **Charge right after the ride** on. The steps
+only **baseline** under **Designs**, and leave ambient at 40 °C with **Charge straight after the ride** on. The steps
 follow the live demo in [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).
 
 ### 1. The baseline fails after a ride
@@ -80,7 +80,7 @@ follow the live demo in [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).
 
 The page leads with its verdict. Each circle in the grid is one check. The solid orange one is REQ-03: the hottest
 cell reaches 47.6 °C while charging, against a 45 °C limit, and a failed *must* requirement disqualifies the
-design. Rings are warnings. Hover a circle to see the check and its result. Turn **Charge right after the ride**
+design. Rings are warnings. Hover a circle to see the check and its result. Turn **Charge straight after the ride**
 off and the same pack passes at 44.7 °C, so the hot plug-in is what breaks it.
 
 ### 2. Find where the heat is
@@ -100,9 +100,9 @@ the whole charge, by up to 3.2 K. It holds charging for 48 min, then charges whi
 
 ### 4. Read the cause chain and the fixes
 
-![Conflicts tab: REQ-03 expanded with subsystems, the cause chain and three candidate fixes](docs/screenshots/conflicts.png)
+![Issues and fixes tab: REQ-03 expanded with subsystems, the cause chain and three candidate fixes](docs/screenshots/conflicts.png)
 
-**Conflicts** lists every failure and warning with the subsystems involved, the cause chain and candidate fixes.
+**Issues and fixes** lists every failure and warning with the subsystems involved, the cause chain and candidate fixes.
 The first fix, derating on a thermal observer, is what Option C does in firmware only.
 
 ### 5. Add the options and get a recommendation
@@ -120,7 +120,7 @@ limit carry the same marks as the grid.
 
 ### 6. Check the model against measured data
 
-![Validation tab: hold-out error tiles, then a 45 °C hold-out charge replayed through the calibrated model, voltage and temperature](docs/screenshots/validation.png)
+![Validation and spread tab: hold-out error tiles, then a 45 °C hold-out charge replayed through the calibrated model, voltage and temperature](docs/screenshots/validation.png)
 
 **Validation** shows how the calibrated NMC cell model does on 45 °C logs the fit never saw. The replay above is
 a hold-out charge: 17 mV voltage error, but the model under-predicts the temperature rise about 2×. The tab also
@@ -164,21 +164,20 @@ python -m venv .venv
 .venv/Scripts/streamlit run app.py
 ```
 
-Above the tabs, the page leads with the recommendation and a requirement grid: one row per design, ranked, and one
-circle per requirement or interface rule (solid orange = fail, ring = warning, grey = pass). The sidebar picks the
-study and designs. It also sets ambient temperature, whether the charge starts right after
-the ride, and the **Unmodelled heat ×** factor. A what-if panel varies parallel count, C-rate, derating window,
-cooling and sensor layout.
+Above the tabs, the page leads with the recommendation, a line saying whether it survives 2× the modelled heat, four
+headline numbers for the recommended design (energy, charge time, peak charge temperature, cost) with the requirement
+each is checked against, and the requirement grid: one row per design, ranked, and one circle per requirement or
+interface rule (solid orange = fail, ring = warning, grey = pass). The sidebar picks the study and designs. It also sets
+ambient temperature, whether the charge starts straight after the ride, and the **Unmodelled heat ×** factor. The
+**What-if design** panel varies parallel count, C-rate, derating window, cooling and sensor layout.
 
 | Tab | Shows |
 |---|---|
 | Compare | KPI table with evidence levels and the requirement each KPI is checked against, trade-off radar |
-| Time series | Charge and drive signals per design, with BMS events |
-| Heat map | Cell temperatures at the peak, with BMS sensor positions |
-| Conflicts | Failures and warnings with cause chains and candidate fixes |
-| Traceability | Requirement → metric → assumption matrix, design JSON download |
-| Monte Carlo | Spread of energy, charge time and peak temperature over sampled packs |
-| Validation | Calibration and hold-out results, log replay, fit your own log |
+| Behaviour | Heat map (cell temperatures at the peak, with BMS sensor positions), then charge and drive time series with BMS events |
+| Issues and fixes | Failures and warnings with cause chains and candidate fixes |
+| Evidence | Requirement → metric → assumption matrix, design JSON download |
+| Validation and spread | Calibration and hold-out results, log replay, fit your own log; then Monte Carlo spread of energy, charge time and peak temperature |
 
 ### Command line
 

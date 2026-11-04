@@ -6,14 +6,17 @@ enableStaticServing = true
 [browser]
 gatherUsageStats = false
 
+[client]
+toolbarMode = "viewer"  # keeps Settings (theme switch for projectors), hides developer items
+
 [theme]
 font = "Barlow, sans-serif"
 headingFont = "Barlow Semi Condensed, Barlow, sans-serif"
 headingFontWeights = [600, 600, 600, 600, 600, 600]
-headingFontSizes = ["2.25rem", "1.5rem", "1.2rem", "1rem", "1rem", "1rem"]
+headingFontSizes = ["2.25rem", "1.35rem", "1.1rem", "1rem", "1rem", "1rem"]
 baseFontSize = 16
-baseRadius = "4px"
-buttonRadius = "4px"
+baseRadius = "6px"
+buttonRadius = "6px"
 showWidgetBorder = true
 showSidebarBorder = true
 chartCategoricalColors = ["#2E75B6", "#1B9E77", "#C9A227", "#8E6BBF", "#D46A9F", "#6B7280"]
@@ -53,7 +56,7 @@ linkColor = "#1F4E79"
 dataframeHeaderBackgroundColor = "#EDF1F5"
 
 [theme.light.sidebar]
-backgroundColor = "#EDF1F5"
+backgroundColor = "#F7F9FB"
 secondaryBackgroundColor = "#FFFFFF"
 
 [theme.dark]

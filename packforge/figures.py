@@ -21,9 +21,18 @@ SIGNALS = {"Max cell temp °C": "t_max", "BMS hotspot view °C": "t_bms_hot", "H
 # Categorical, distinguishable in light and dark; orange is kept for alerts (fail / hot), not for designs.
 DESIGN_COLORS = ["#2E75B6", "#1B9E77", "#C9A227", "#8E6BBF", "#D46A9F", "#6B7280"]
 MEASURED_COLOR = "#8A929E"
-GRID = "rgba(128,128,128,0.25)"
-_BASE = {"paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)", "font": {"size": 13},
-         "legend": {"orientation": "h", "yanchor": "top", "y": -0.3, "x": 0}, "hovermode": "x unified"}
+GRID = "rgba(128,128,128,0.15)"
+MARK = "rgba(128,128,128,0.7)"  # reference lines (percentiles)
+_BASE = {"paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)",
+         "font": {"family": "Barlow, sans-serif", "size": 13}, "hoverlabel": {"font_size": 12},
+         "margin": {"l": 8, "r": 8, "t": 64, "b": 8},
+         "legend": {"orientation": "h", "yanchor": "top", "y": -0.22, "x": 0}, "hovermode": "x unified"}
+
+
+def _title(fig: go.Figure) -> go.Figure:
+    """Left-aligned titles, set after the text so every builder shares one style."""
+    fig.update_layout(title={"x": 0, "xanchor": "left", "font": {"size": 15}})
+    return fig
 
 
 def design_color(i: int) -> str:
@@ -42,9 +51,9 @@ def _split(name: str) -> tuple[str, str]:
 
 
 def _axes(fig: go.Figure) -> go.Figure:
-    fig.update_xaxes(gridcolor=GRID, zeroline=False)
-    fig.update_yaxes(gridcolor=GRID, zeroline=False)
-    return fig
+    fig.update_xaxes(showgrid=False, zeroline=False, automargin=True)
+    fig.update_yaxes(gridcolor=GRID, zeroline=False, automargin=True)
+    return _title(fig)
 
 
 def radar(results: list[DesignResult], study: Study) -> go.Figure:
@@ -60,13 +69,13 @@ def radar(results: list[DesignResult], study: Study) -> go.Figure:
             vals.append(v if w > 0 else 1 - v)
         c = design_color(i)
         fig.add_trace(go.Scatterpolar(r=vals + vals[:1], theta=labels + labels[:1], fill="toself", name=r.design.name,
-                                      line={"color": c, "width": 2}, fillcolor=_rgba(c, 0.15)))
+                                      line={"color": c, "width": 2}, fillcolor=_rgba(c, 0.10)))
     fig.update_layout(**{**_BASE, "hovermode": "closest", "legend": {**_BASE["legend"], "y": -0.08}},
                       title="Relative trade-off (outer = better)", height=520,
                       polar={"bgcolor": "rgba(0,0,0,0)",
                              "radialaxis": {"range": [0, 1], "showticklabels": False, "gridcolor": GRID},
                              "angularaxis": {"gridcolor": GRID}})
-    return fig
+    return _title(fig)
 
 
 def timeseries(results: list[DesignResult], scenario: str, label: str) -> go.Figure:
@@ -75,8 +84,7 @@ def timeseries(results: list[DesignResult], scenario: str, label: str) -> go.Fig
         tr = getattr(r, scenario)
         fig.add_trace(go.Scatter(x=tr.t_s / 60, y=getattr(tr, SIGNALS[label])[:, 0], name=r.design.name, mode="lines",
                                  line={"color": design_color(i), "width": 2}))
-    fig.update_layout(**_BASE, title=f"{label} — {scenario}", xaxis_title="time [min]", height=380,
-                      margin={"t": 48})
+    fig.update_layout(**_BASE, title=f"{label}<br><sup>{scenario}</sup>", xaxis_title="time [min]", height=380)
     return _axes(fig)
 
 
@@ -91,11 +99,12 @@ def heatmap(r: DesignResult, zrange: tuple[float, float] | None = None) -> go.Fi
                                hovertemplate="parallel group %{y}, cell %{x}<br>%{z:.1f} °C<extra></extra>"))
     fig.add_trace(go.Scatter(x=cols, y=rows, mode="markers", showlegend=False, hoverinfo="skip",
                              marker={"size": 12, "symbol": "circle-open", "color": "#4FD1C5", "line": {"width": 2}}))
-    fig.update_layout(**{**_BASE, "hovermode": "closest"}, height=460,
+    fig.update_layout(**{**_BASE, "hovermode": "closest"}, height=400,
                       title=f"{head}<br><sup>{tail + ' · ' if tail else ''}{tr.scenario} peak</sup>",
-                      xaxis={"title": "cell in group", "showgrid": False},
-                      yaxis={"title": "parallel group", "autorange": "reversed", "showgrid": False})
-    return fig
+                      xaxis={"title": "cell in group", "showgrid": False, "automargin": True},
+                      yaxis={"title": "parallel group", "autorange": "reversed", "showgrid": False,
+                             "automargin": True})
+    return _title(fig)
 
 
 def heat_range(results: list[DesignResult]) -> tuple[float, float]:
@@ -107,6 +116,9 @@ def heat_range(results: list[DesignResult]) -> tuple[float, float]:
 
 def histogram(values: np.ndarray, metric: str, color: str) -> go.Figure:
     fig = go.Figure(go.Histogram(x=values, nbinsx=20, marker={"color": color}))
+    for q in (5, 95):
+        fig.add_vline(x=float(np.percentile(values, q)), line={"color": MARK, "width": 1, "dash": "dot"},
+                      annotation_text=f"P{q}", annotation_position="top")
     fig.update_layout(**{**_BASE, "hovermode": "closest"}, height=320, bargap=0.05,
                       title=f"{METRICS[metric].label}<br><sup>mean {values.mean():.1f} · P5 "
                             f"{np.percentile(values, 5):.1f} · P95 {np.percentile(values, 95):.1f}</sup>",
@@ -120,5 +132,5 @@ def validation(t_s: np.ndarray, measured: np.ndarray, predicted: np.ndarray, lab
                              line={"color": MEASURED_COLOR, "width": 1.5}))
     fig.add_trace(go.Scatter(x=t_s / 60, y=predicted, name="model", mode="lines",
                              line={"color": DESIGN_COLORS[0], "width": 2, "dash": "dash"}))
-    fig.update_layout(**_BASE, title=label, xaxis_title="time [min]", height=360, margin={"t": 48})
+    fig.update_layout(**_BASE, title=label, xaxis_title="time [min]", height=360)
     return _axes(fig)

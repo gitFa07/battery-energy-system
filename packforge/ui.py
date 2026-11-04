@@ -1,4 +1,4 @@
-"""HTML pieces for the Streamlit UI: verdict, requirement grid, KPI table.
+"""HTML pieces for the Streamlit UI: verdict, KPI cards, robustness line, requirement grid, KPI table.
 
 The grid draws every requirement and interface rule as one cell of a pack seen from above (designs × checks). Only
 failures carry colour: fail = solid orange, warning = orange ring, pass = faint. Colours resolve against
@@ -20,18 +20,39 @@ CSS = """
 <style>
 .pf { --alert:#C2410C; --accent:#2E75B6; --quiet:color-mix(in srgb, currentColor 20%, transparent);
       --muted:color-mix(in srgb, currentColor 70%, transparent); --line:color-mix(in srgb, currentColor 16%, transparent);
+      --card-bg:color-mix(in srgb, currentColor 4%, transparent); --radius:6px; --gap:1rem;
       font-variant-numeric: tabular-nums; }
 .pf .vh { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
-.pf-mast { margin:0 0 .9rem; font-size:.95rem; max-width:75ch; }
+.pf-mast { margin:0 0 1.2rem; font-size:.95rem; max-width:75ch; }
 .pf-mast span { color:var(--muted); }
 .pf-mast b { font-family:"Barlow Semi Condensed", Barlow, sans-serif; font-weight:600; font-size:1.05rem;
              margin-right:.6rem; }
-.pf-verdict h1 { font-family:"Barlow Semi Condensed", Barlow, sans-serif; font-weight:600; font-size:2.6rem;
-                 line-height:1.08; margin:0; padding:0; text-wrap:balance; }
+.pf-verdict .eyebrow { margin:0 0 .2rem; font-size:.8rem; color:var(--muted); }
+.pf-verdict h1 { font-family:"Barlow Semi Condensed", Barlow, sans-serif; font-weight:600; font-size:2.2rem;
+                 line-height:1.12; margin:0; padding:0; text-wrap:balance; }
 .pf-verdict h1 span { display:block; font-size:1.35rem; line-height:1.3; font-weight:600; color:var(--muted); }
 .pf-verdict.none h1 { color:var(--alert); }
 .pf-verdict p { margin:.55rem 0 0; max-width:72ch; font-size:1.05rem; }
-.pf-scroll { overflow-x:auto; margin:1.4rem 0 .4rem; }
+.pf-robust { margin:.7rem 0 0; max-width:72ch; font-size:.92rem; color:var(--muted); }
+.pf-robust.fail { color:inherit; padding-left:.7rem; box-shadow:inset 3px 0 0 var(--alert); }
+.pf-top { margin:1.4rem 0 .5rem; font-size:.9rem; color:var(--muted); }
+.pf-cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(10rem, 1fr)); gap:var(--gap);
+            margin:1.4rem 0 1.4rem; }
+.pf-top + .pf-cards { margin-top:0; }
+.pf .card { border:1px solid var(--line); border-radius:var(--radius); padding:.9rem 1rem; background:var(--card-bg);
+            min-width:0; }
+.pf .card .k { font-size:.85rem; color:var(--muted); }
+.pf .card .v { font-family:"Barlow Semi Condensed", Barlow, sans-serif; font-weight:600; font-size:1.9rem;
+               line-height:1.15; margin:.15rem 0 .35rem; white-space:nowrap; }
+.pf .card .v.fail { color:var(--alert); }
+.pf .card .lim { display:flex; flex-wrap:wrap; align-items:center; gap:.3rem .5rem; font-size:.8rem;
+                 color:var(--muted); }
+.pf .card .ev { margin-top:.25rem; font-size:.75rem; color:var(--muted); }
+.pf .pill { display:inline-block; font-size:.75rem; line-height:1.4; padding:0 .55rem; border-radius:999px;
+            border:1px solid var(--line); color:var(--muted); white-space:nowrap; }
+.pf .pill.warn { border-color:var(--alert); color:var(--alert); }
+.pf .pill.fail { border-color:var(--alert); background:var(--alert); color:#fff; font-weight:600; }
+.pf-scroll { overflow-x:auto; margin:1rem 0 .4rem; }
 .pf-grid { border-collapse:separate; border-spacing:0; }
 .pf-grid caption { caption-side:bottom; text-align:left; color:var(--muted); font-size:.85rem; padding-top:.5rem; }
 .pf-grid th, .pf-grid td { padding:3px; text-align:center; font-weight:500; border:0; background:none; }
@@ -98,14 +119,64 @@ def masthead(study: Study, hot: bool, heat: float) -> str:
 
 def verdict(recs: list[Recommendation], results: list[DesignResult]) -> str:
     if not recs:
-        return ('<div class="pf pf-verdict none"><h1>No design meets every must requirement</h1>'
-                '<p>Open <b>Conflicts</b> for the cause chain and candidate fixes, or add an option.</p></div>')
+        return ('<div class="pf pf-verdict none"><p class="eyebrow">Result</p>'
+                '<h1>No design meets every must requirement</h1>'
+                '<p>Open <b>Issues and fixes</b> to see why each design fails and what would fix it, or add a '
+                'design.</p></div>')
     by_id = {r.design.id: r for r in results}
     top = recs[0]
     head, tail = split_name(by_id[top.design_id].design.name)
     why = top.why[0].upper() + top.why[1:]
-    return (f'<div class="pf pf-verdict"><h1>Recommended: {escape(head)}<span>{escape(tail)}</span></h1>'
+    return (f'<div class="pf pf-verdict"><p class="eyebrow">Recommendation</p>'
+            f'<h1>Recommended: {escape(head)}<span>{escape(tail)}</span></h1>'
             f'<p>{_text(why)}.</p></div>')
+
+
+def robustness_note(recs: list[Recommendation], stress: list[DesignResult], factor: float,
+                    current: float = 1.0) -> str:
+    """One line under the verdict: does the recommended design survive `factor` x the modelled heat?
+
+    `stress` is the same designs re-run with `engine.with_heat_factor(d, factor)`. Empty when nothing is
+    recommended or the slider already sits at or above `factor`."""
+    if not recs or factor <= current:
+        return ""
+    s = next((r for r in stress if r.design.id == recs[0].design_id), None)
+    if s is None:
+        return ""
+    head = split_name(s.design.name)[0]
+    if not s.fails:
+        return (f'<div class="pf"><p class="pf-robust">At {factor:g}× the modelled heat, {escape(head)} still '
+                f'passes every must requirement and critical rule.</p></div>')
+    failed = "; ".join(f"{f.id} {f.title}" for f in s.fails)
+    return (f'<div class="pf"><p class="pf-robust fail">At {factor:g}× the modelled heat, {escape(head)} fails '
+            f'{_text(failed)}. On the hold-out logs the model under-predicts the temperature rise by up to about '
+            f'2×, so this is the top risk.</p></div>')
+
+
+def pill(severity: str, text: str | None = None) -> str:
+    """Status label. Always carries a word, so colour is never the only signal."""
+    word = text or {"pass": "pass", "warn": "warning", "fail": "fail"}[severity]
+    return f'<span class="pill {severity}">{escape(word)}</span>'
+
+
+CARD_KPIS = ["usable_energy_wh", "charge_time_min", "t_max_charge_c", "cost_inr"]
+
+
+def kpi_cards(r: DesignResult, study: Study, eligible: bool = True) -> str:
+    """Headline numbers for one design: value, the requirement it is checked against, and the result."""
+    req = {q.metric: q for q in study.requirements}
+    cards = []
+    for k in CARD_KPIS:
+        q = req.get(k)
+        f = next((x for x in r.findings if q and x.requirement == q.id), None)
+        lim = f'<div class="lim">{pill(f.severity)}<span>{_text(_limit(q))}</span></div>' if q and f else ""
+        cls = " fail" if f and f.severity == "fail" else ""
+        cards.append(f'<div class="card"><div class="k">{escape(METRICS[k].label)}</div>'
+                     f'<div class="v{cls}">{escape(fmt(k, r.metrics[k]))}</div>{lim}'
+                     f'<div class="ev">{escape(METRICS[k].evidence)}</div></div>')
+    top = "" if eligible else (f'<p class="pf-top">Top-ranked design: <b>{escape(split_name(r.design.name)[0])}</b> '
+                               f'{pill("fail", "ineligible")}</p>')
+    return f'<div class="pf">{top}<div class="pf-cards">{"".join(cards)}</div></div>'
 
 
 def alternatives(recs: list[Recommendation]) -> str:
@@ -160,7 +231,7 @@ def requirement_grid(results: list[DesignResult], ranking: list[Ranking], study:
               'critical rule disqualifies)</span><span><span class="c sm warn"></span>warning</span>'
               '<span><span class="c sm"></span>pass</span></div>')
     return (f'<div class="pf"><div class="pf-scroll"><table class="pf-grid"><caption>Designs ranked by score. '
-            f'Hover a cell for the check and its result.</caption><thead><tr>{top}</tr><tr>{sub}</tr></thead>'
+            f'Hover a cell to see the check and its result.</caption><thead><tr>{top}</tr><tr>{sub}</tr></thead>'
             f'<tbody>{"".join(body)}</tbody></table></div>{legend}</div>')
 
 
