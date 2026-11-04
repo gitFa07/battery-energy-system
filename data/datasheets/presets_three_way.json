@@ -1,0 +1,73 @@
+{
+  "_about": "Three reference designs from TASK.md §1.2. `presets` are model INPUTS. `round1_targets` are the Round-1 submission numbers: targets the models are compared against with a tolerance, never asserted as outputs. A null status means TASK.md gives no PASS/FAIL for that cell.",
+  "presets": [
+    {
+      "id": "baseline",
+      "name": "Starting baseline",
+      "cell_id": "nmc21700_4p8ah",
+      "n_series": 13,
+      "n_parallel": 12,
+      "cooling_id": "passive_air",
+      "busbar_id": "ni_strip_015mm",
+      "n_ntc": 4,
+      "fuse_id": "fuse_100a",
+      "bms_id": "bms_basic",
+      "usable_dod": 0.92,
+      "charge_c_rate": 1.0,
+      "ambient_c": 40.0,
+      "source": "TASK.md §1.2 column 'Starting Baseline'. usable_dod and charge_c_rate are team assumptions (92 % DoD window for NMC; 1 C CC fast charge)."
+    },
+    {
+      "id": "option_a",
+      "name": "Design option A (LFP + forced air)",
+      "cell_id": "lfp21700_3p8ah",
+      "n_series": 15,
+      "n_parallel": 14,
+      "cooling_id": "forced_air_fan",
+      "busbar_id": "cu_busbar_015mm",
+      "n_ntc": 6,
+      "fuse_id": "fuse_100a",
+      "bms_id": "bms_fan_pwm",
+      "usable_dod": 0.96,
+      "charge_c_rate": 0.95,
+      "ambient_c": 40.0,
+      "source": "TASK.md §1.2 column 'Design Option A'. usable_dod (LFP tolerates a wider window) and charge_c_rate (just under the 1 C LFP class limit) are team assumptions."
+    },
+    {
+      "id": "option_b",
+      "name": "Design option B (NMC + Al-fin/PCM)",
+      "cell_id": "nmc21700_4p8ah",
+      "n_series": 13,
+      "n_parallel": 12,
+      "cooling_id": "al_fin_pcm",
+      "busbar_id": "cu_busbar_015mm",
+      "n_ntc": 8,
+      "fuse_id": "pyro_fuse_120a",
+      "bms_id": "bms_active",
+      "usable_dod": 0.92,
+      "charge_c_rate": 1.1,
+      "ambient_c": 40.0,
+      "source": "TASK.md §1.2 column 'Design Option B'. usable_dod is a team assumption; charge_c_rate 1.1 C assumes the active BMS's thermal-aware limit allows slightly above 1 C while cells stay cool."
+    }
+  ],
+  "round1_targets": {
+    "baseline": {
+      "usable_energy_kwh": 2.52, "t_peak_c": 58.4, "charge_time_10_80_min": 42.0, "charge_time_derated_min": 68.0,
+      "mass_kg": 13.8, "volume_l": 9.2, "bom_cost_usd": 310.0,
+      "status": {"REQ-EL-02": "PASS", "REQ-TH-01": "FAIL", "REQ-CH-01": null, "REQ-ME-01": "PASS", "REQ-ME-02": "PASS", "REQ-EC-01": "PASS"},
+      "verdict": "UNSAFE"
+    },
+    "option_a": {
+      "usable_energy_kwh": 2.45, "t_peak_c": 43.1, "charge_time_10_80_min": 44.0, "charge_time_derated_min": null,
+      "mass_kg": 19.6, "volume_l": 12.8, "bom_cost_usd": 275.0,
+      "status": {"REQ-EL-02": "PASS", "REQ-TH-01": "PASS", "REQ-CH-01": "PASS", "REQ-ME-01": "FAIL", "REQ-ME-02": "FAIL", "REQ-EC-01": "PASS"},
+      "verdict": "REJECTED"
+    },
+    "option_b": {
+      "usable_energy_kwh": 2.52, "t_peak_c": 44.2, "charge_time_10_80_min": 39.0, "charge_time_derated_min": null,
+      "mass_kg": 15.4, "volume_l": 10.1, "bom_cost_usd": 345.0,
+      "status": {"REQ-EL-02": "PASS", "REQ-TH-01": "PASS", "REQ-CH-01": "PASS", "REQ-ME-01": "PASS", "REQ-ME-02": "PASS", "REQ-EC-01": "PASS"},
+      "verdict": "OPTIMAL"
+    }
+  }
+}

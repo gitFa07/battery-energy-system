@@ -1,0 +1,111 @@
+{
+  "_about": "Interconnects, sensors, fuses and BMS options. Resistivities are standard material values at 20 C; ratings, masses and costs are class estimates (assumptions), not quotes for specific parts.",
+  "busbars": [
+    {
+      "id": "ni_strip_015mm",
+      "name": "Nickel strip 0.15 x 8 mm",
+      "material": "Ni",
+      "thickness_mm": 0.15,
+      "width_mm": 8.0,
+      "resistivity_ohm_m": 6.99e-8,
+      "link_length_mm": 22.0,
+      "ampacity_a": 8.0,
+      "mass_per_cell_kg": 0.003,
+      "cost_per_cell_usd": 0.06,
+      "source": "Resistivity: pure nickel 6.99e-8 ohm*m at 20 C (handbook value). Link length = 21700 pitch + 1 mm gap. Ampacity, mass and cost per cell = class assumptions for spot-welded strip."
+    },
+    {
+      "id": "cu_busbar_015mm",
+      "name": "Copper busbar 0.15 x 10 mm",
+      "material": "Cu",
+      "thickness_mm": 0.15,
+      "width_mm": 10.0,
+      "resistivity_ohm_m": 1.68e-8,
+      "link_length_mm": 22.0,
+      "ampacity_a": 20.0,
+      "mass_per_cell_kg": 0.004,
+      "cost_per_cell_usd": 0.10,
+      "source": "Resistivity: annealed copper 1.68e-8 ohm*m at 20 C (handbook value). Link length = 21700 pitch + 1 mm gap. Ampacity, mass and cost per cell = class assumptions for laser-welded Cu (Ni-plated tabs)."
+    }
+  ],
+  "protection": [
+    {
+      "id": "ntc_10k",
+      "name": "10 kOhm NTC thermistor",
+      "kind": "ntc",
+      "rating_a": null,
+      "ntc_channels": null,
+      "fan_pwm": false,
+      "active_balancing": false,
+      "thermal_aware_charging": false,
+      "mass_kg": 0.002,
+      "cost_usd": 0.30,
+      "source": "Class estimate for a lugged 10k NTC with lead."
+    },
+    {
+      "id": "fuse_100a",
+      "name": "100 A blade/bolt-down fuse",
+      "kind": "fuse",
+      "rating_a": 100.0,
+      "ntc_channels": null,
+      "fan_pwm": false,
+      "active_balancing": false,
+      "thermal_aware_charging": false,
+      "mass_kg": 0.03,
+      "cost_usd": 4.0,
+      "source": "Rating from TASK.md §1.2; mass and cost = class estimates."
+    },
+    {
+      "id": "pyro_fuse_120a",
+      "name": "120 A pyro-fuse",
+      "kind": "pyro_fuse",
+      "rating_a": 120.0,
+      "ntc_channels": null,
+      "fan_pwm": false,
+      "active_balancing": false,
+      "thermal_aware_charging": false,
+      "mass_kg": 0.08,
+      "cost_usd": 12.0,
+      "source": "Rating from TASK.md §1.2; mass and cost = class estimates for a low-voltage pyro disconnect."
+    },
+    {
+      "id": "bms_basic",
+      "name": "Basic BMS (passive balancing)",
+      "kind": "bms",
+      "rating_a": 100.0,
+      "ntc_channels": 4,
+      "fan_pwm": false,
+      "active_balancing": false,
+      "thermal_aware_charging": false,
+      "mass_kg": 0.15,
+      "cost_usd": 28.0,
+      "source": "Class estimate for a 13-16S 100 A e-2W BMS board with 4 NTC inputs."
+    },
+    {
+      "id": "bms_fan_pwm",
+      "name": "BMS with fan PWM output",
+      "kind": "bms",
+      "rating_a": 100.0,
+      "ntc_channels": 6,
+      "fan_pwm": true,
+      "active_balancing": false,
+      "thermal_aware_charging": false,
+      "mass_kg": 0.18,
+      "cost_usd": 32.0,
+      "source": "Class estimate: basic BMS plus fan driver and 6 NTC inputs."
+    },
+    {
+      "id": "bms_active",
+      "name": "Active BMS (active balancing, thermal-aware charging)",
+      "kind": "bms",
+      "rating_a": 120.0,
+      "ntc_channels": 8,
+      "fan_pwm": false,
+      "active_balancing": true,
+      "thermal_aware_charging": true,
+      "mass_kg": 0.22,
+      "cost_usd": 36.0,
+      "source": "Class estimate for a 120 A BMS with active balancing, 8 NTC inputs and temperature-dependent charge-current limits."
+    }
+  ]
+}

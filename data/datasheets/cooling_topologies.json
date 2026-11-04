@@ -1,0 +1,50 @@
+{
+  "_about": "Pack-level cooling topologies. r_th_k_w is the lumped pack-to-ambient thermal resistance; q_dissipation_w is the heat rejected at a 10 K pack-to-ambient difference (= 10 / r_th_k_w). All values are team assumptions with the stated basis — none is measured.",
+  "cooling": [
+    {
+      "id": "passive_air",
+      "name": "Passive natural-air enclosure",
+      "kind": "passive",
+      "r_th_k_w": 0.45,
+      "q_dissipation_w": 22.2,
+      "fan_power_w": 0.0,
+      "pcm_mass_kg": 0.0,
+      "pcm_latent_j_kg": 0.0,
+      "pcm_melt_c": null,
+      "mass_kg": 0.0,
+      "volume_l": 0.0,
+      "cost_usd": 0.0,
+      "source": "Assumption: free convection h ~ 8 W/m2K (typical 5-10 W/m2K for air) over ~0.28 m2 of enclosure surface -> R = 1/(hA) ~ 0.45 K/W. No added parts."
+    },
+    {
+      "id": "forced_air_fan",
+      "name": "Forced-air duct + 12 V axial fan",
+      "kind": "forced_air",
+      "r_th_k_w": 0.10,
+      "q_dissipation_w": 100.0,
+      "fan_power_w": 3.0,
+      "pcm_mass_kg": 0.0,
+      "pcm_latent_j_kg": 0.0,
+      "pcm_melt_c": null,
+      "mass_kg": 0.35,
+      "volume_l": 0.9,
+      "cost_usd": 14.0,
+      "source": "Assumption: forced convection h ~ 35 W/m2K (typical 25-50 W/m2K at low duct velocity) over ~0.28 m2 -> R ~ 0.10 K/W. Fan power, duct mass/volume/cost are class estimates for a 60-80 mm 12 V axial fan."
+    },
+    {
+      "id": "al_fin_pcm",
+      "name": "Aluminium-fin conduction + PCM matrix",
+      "kind": "conduction_pcm",
+      "r_th_k_w": 0.15,
+      "q_dissipation_w": 66.7,
+      "fan_power_w": 0.0,
+      "pcm_mass_kg": 0.8,
+      "pcm_latent_j_kg": 200000.0,
+      "pcm_melt_c": 44.0,
+      "mass_kg": 1.3,
+      "volume_l": 0.9,
+      "cost_usd": 16.0,
+      "source": "Assumption: Al fins spread heat to the enclosure wall (effective area ~3x passive) -> R ~ 0.15 K/W. PCM = paraffin class, latent heat ~200 kJ/kg (typical 150-250), melt point chosen between 40 C ambient and 45 C charge limit. Mass = 0.5 kg fins + 0.8 kg PCM."
+    }
+  ]
+}

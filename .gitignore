@@ -24,3 +24,6 @@ packforge_report.html
 
 # Demo GIF backups (large; kept local, see docs/DEMO_SCRIPT.md)
 docs/backup/*.gif
+
+# VoltTwin SQLite datasheet cache (re-seeded from data/datasheets/*.json)
+data/datasheets/*.db

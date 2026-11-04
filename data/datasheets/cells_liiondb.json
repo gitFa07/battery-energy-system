@@ -1,0 +1,49 @@
+{
+  "_about": "Generic 21700 class cells for VoltTwin. Values are representative class values, NOT taken from a LiionDB entry or a named part's datasheet. LiionDB / PyBaMM parameter sets are used only for the electrochemical model (pybamm_parameter_set).",
+  "cells": [
+    {
+      "id": "nmc21700_4p8ah",
+      "name": "Generic NMC 21700 4.8 Ah class",
+      "chemistry": "NMC",
+      "form_factor": "21700",
+      "v_nom_v": 3.65,
+      "v_max_v": 4.2,
+      "v_min_v": 2.5,
+      "capacity_ah": 4.8,
+      "r0_ohm": 0.018,
+      "mass_kg": 0.068,
+      "diameter_mm": 21.0,
+      "height_mm": 70.0,
+      "cp_j_kgk": 1000.0,
+      "max_charge_c": 1.5,
+      "max_discharge_c": 3.0,
+      "t_charge_max_c": 45.0,
+      "t_discharge_max_c": 60.0,
+      "cost_usd": 1.35,
+      "pybamm_parameter_set": "Marquis2019",
+      "source": "TASK.md §2 Phase 1 seed (Round-1 values); generic NMC 21700 class, not a specific part. Geometry = 21700 standard; cp ~0.9-1.1 kJ/kgK typical for cylindrical Li-ion (assumption); C-rate and temperature limits = class assumptions."
+    },
+    {
+      "id": "lfp21700_3p8ah",
+      "name": "Generic LFP 21700 3.8 Ah class",
+      "chemistry": "LFP",
+      "form_factor": "21700",
+      "v_nom_v": 3.2,
+      "v_max_v": 3.65,
+      "v_min_v": 2.5,
+      "capacity_ah": 3.8,
+      "r0_ohm": 0.022,
+      "mass_kg": 0.072,
+      "diameter_mm": 21.0,
+      "height_mm": 70.0,
+      "cp_j_kgk": 1100.0,
+      "max_charge_c": 1.0,
+      "max_discharge_c": 3.0,
+      "t_charge_max_c": 45.0,
+      "t_discharge_max_c": 60.0,
+      "cost_usd": 0.92,
+      "pybamm_parameter_set": "Prada2013",
+      "source": "TASK.md §2 Phase 1 seed (Round-1 values); generic LFP 21700 class, not a specific part, NOT validated against measurements. Geometry = 21700 standard; cp, C-rate and temperature limits = class assumptions."
+    }
+  ]
+}

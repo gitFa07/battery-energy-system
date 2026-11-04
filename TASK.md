@@ -37,29 +37,29 @@
 ## 2. Phase-by-Phase Execution Tracker
 
 ### Phase 1: Project Scaffolding, Schemas & Verified Datasheet Layer
-- **Status:** Pending
+- **Status:** Done
 - **Objective:** Establish the Python packaging structure, Pydantic v2 data schemas, hard requirement thresholds, and SQLite/JSON datasheet seed layer.
 - **Sub-tasks:**
-  - [ ] Initialize / update `pyproject.toml` and dependencies (`fastapi`, `uvicorn`, `pydantic>=2.7`, `numpy`, `scipy`, `pandas`, `plotly`, `streamlit`, `pybamm`, `pytest`, `httpx`).
+  - [x] Initialize / update `pyproject.toml` and dependencies (`fastapi`, `uvicorn`, `pydantic>=2.7`, `numpy`, `scipy`, `pandas`, `plotly`, `streamlit`, `pybamm`, `pytest`, `httpx`). *(Added as optional extra `volttwin`: `pip install -e ".[dev,volttwin]"`.)*
     - *Target File:* `pyproject.toml`
-  - [ ] Define system configuration and 7 hard requirements (`REQ-EL-01` to `REQ-EC-01`), ambient defaults ($40.0^\circ\text{C}$ ref, $55.0^\circ\text{C}$ BMS cutoff).
+  - [x] Define system configuration and 7 hard requirements (`REQ-EL-01` to `REQ-EC-01`), ambient defaults ($40.0^\circ\text{C}$ ref, $55.0^\circ\text{C}$ BMS cutoff).
     - *Target File:* `src/config.py`
-  - [ ] Seed cell specifications for NMC 21700 ($3.65\text{ V}, 4.8\text{ Ah}, 18.0\text{ m}\Omega, 68\text{ g}, \$1.35$) and LFP 21700 ($3.20\text{ V}, 3.8\text{ Ah}, 22.0\text{ m}\Omega, 72\text{ g}, \$0.92$).
+  - [x] Seed cell specifications for NMC 21700 ($3.65\text{ V}, 4.8\text{ Ah}, 18.0\text{ m}\Omega, 68\text{ g}, \$1.35$) and LFP 21700 ($3.20\text{ V}, 3.8\text{ Ah}, 22.0\text{ m}\Omega, 72\text{ g}, \$0.92$).
     - *Target File:* `data/datasheets/cells_liiondb.json`
-  - [ ] Seed cooling topologies (`passive_air`, `forced_air_fan`, `al_fin_pcm`) with thermal resistance, heat dissipation capacity, parasitic mass, volume, and cost.
+  - [x] Seed cooling topologies (`passive_air`, `forced_air_fan`, `al_fin_pcm`) with thermal resistance, heat dissipation capacity, parasitic mass, volume, and cost.
     - *Target File:* `data/datasheets/cooling_topologies.json`
-  - [ ] Seed interconnects and protection specs (`ni_strip_015mm`, `cu_busbar_015mm`, NTC sensors, fuses, BMS options).
+  - [x] Seed interconnects and protection specs (`ni_strip_015mm`, `cu_busbar_015mm`, NTC sensors, fuses, BMS options).
     - *Target File:* `data/datasheets/busbars_protection.json`
-  - [ ] Seed 3-way reference benchmark presets (Baseline, Option A, Option B).
+  - [x] Seed 3-way reference benchmark presets (Baseline, Option A, Option B).
     - *Target File:* `data/datasheets/presets_three_way.json`
-  - [ ] Implement Pydantic v2 domain schemas (`CellSpec`, `CoolingSpec`, `BusbarSpec`, `ProtectionSpec`, `ModuleDesignInput`, `ModuleSimulationResult`, `TraceabilityRecord`).
+  - [x] Implement Pydantic v2 domain schemas (`CellSpec`, `CoolingSpec`, `BusbarSpec`, `ProtectionSpec`, `ModuleDesignInput`, `ModuleSimulationResult`, `TraceabilityRecord`).
     - *Target File:* `src/models/schemas.py`
-  - [ ] Implement SQLite datasheet repository and database loader (`db.py`).
+  - [x] Implement SQLite datasheet repository and database loader (`db.py`).
     - *Target File:* `src/models/db.py`
-  - [ ] Create package initialization files.
+  - [x] Create package initialization files.
     - *Target Files:* `src/__init__.py`, `src/models/__init__.py`
 - **Verification Commands:**
-  - [ ] `pytest tests/test_datasheets.py -v` (Verify clean loading, schema validation, and preset parameter integrity)
+  - [x] `pytest tests/test_datasheets.py -v` (Verify clean loading, schema validation, and preset parameter integrity)
 
 ---
 
@@ -184,7 +184,7 @@
 ## 3. Overall Execution Summary
 | Phase | Name | Scope | Status |
 |---|---|---|---|
-| **Phase 1** | Scaffolding, Schemas & Datasheets | Schemas, SQLite loader, LiionDB datasheets | **Pending** |
+| **Phase 1** | Scaffolding, Schemas & Datasheets | Schemas, SQLite loader, LiionDB datasheets | **Done** |
 | **Phase 2** | Multi-Physics Engine | PyBaMM, Electrical, Thermal, Mechanical, BOM | **Pending** |
 | **Phase 3** | Conflict & Traceability Engine | 3 Rules, Traceability Graph, TOPSIS | **Pending** |
 | **Phase 4** | FastAPI Backend Service | REST Endpoints, API Tests | **Pending** |
